@@ -1,5 +1,5 @@
 import { type ColDef } from "ag-grid-community";
-import { Grid } from "./component";
+import { Button, Grid } from "@/ui";
 
 export const App = () => {
   // 컬럼 정의
@@ -27,7 +27,7 @@ export const App = () => {
 
   return (
     <div className="p-8">
-      <h1 className="text-3xl font-bold mb-6">AG Grid</h1>
+      <Button>Hello</Button>
       <Grid
         columnDefs={columnDefs}
         rowData={rowData}
