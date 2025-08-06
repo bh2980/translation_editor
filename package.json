@@ -10,8 +10,10 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@ag-grid-community/locale": "^34.1.1",
     "@tailwindcss/vite": "^4.1.11",
     "ag-grid-community": "^34.1.1",
+    "ag-grid-react": "^34.1.1",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "tailwindcss": "^4.1.11"
