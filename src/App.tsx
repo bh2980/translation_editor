@@ -1,13 +1,16 @@
-import { AgGridReact } from "ag-grid-react";
-import type { ColDef } from "ag-grid-community";
-import { AG_GRID_LOCALE_KR } from "@ag-grid-community/locale";
-import "ag-grid-community/styles/ag-grid.css";
-import "ag-grid-community/styles/ag-theme-quartz.css";
+import { type ColDef } from "ag-grid-community";
+import { Grid } from "./component";
 
 export const App = () => {
   // 컬럼 정의
   const columnDefs: ColDef[] = [
-    { field: "name", headerName: "이름", sortable: true, filter: true },
+    {
+      field: "name",
+      headerName: "이름",
+      sortable: true,
+      filter: true,
+      editable: true,
+    },
     { field: "age", headerName: "나이", sortable: true, filter: true },
     { field: "city", headerName: "도시", sortable: true, filter: true },
     { field: "email", headerName: "이메일", sortable: true, filter: true },
@@ -25,17 +28,13 @@ export const App = () => {
   return (
     <div className="p-8">
       <h1 className="text-3xl font-bold mb-6">AG Grid</h1>
-      <div className="ag-theme-quartz">
-        <AgGridReact
-          localeText={AG_GRID_LOCALE_KR}
-          theme={"legacy"}
-          columnDefs={columnDefs}
-          rowData={rowData}
-          pagination={true}
-          paginationPageSize={10}
-          domLayout="autoHeight"
-        />
-      </div>
+      <Grid
+        columnDefs={columnDefs}
+        rowData={rowData}
+        pagination={true}
+        paginationPageSize={10}
+        domLayout="autoHeight"
+      />
     </div>
   );
 };
