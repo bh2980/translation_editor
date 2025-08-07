@@ -114,7 +114,22 @@
   * {
     @apply border-border outline-ring/50;
   }
+  html,
+  body,
+  #root {
+    @apply w-full h-screen;
+  }
   body {
     @apply bg-background text-foreground;
+  }
+  .ag-header-cell,
+  .ag-cell {
+    padding: 0 !important;
+  }
+  .ag-cell-wrapper {
+    height: 100%;
+    span {
+      height: 100%;
+    }
   }
 }
