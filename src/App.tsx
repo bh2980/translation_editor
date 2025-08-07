@@ -1,5 +1,12 @@
 import { type ColDef } from "ag-grid-community";
-import { Button, Grid } from "@/ui";
+import {
+  Grid,
+  Menubar,
+  MenubarContent,
+  MenubarItem,
+  MenubarMenu,
+  MenubarTrigger,
+} from "@/ui";
 
 export const App = () => {
   // 컬럼 정의
@@ -26,8 +33,15 @@ export const App = () => {
   ];
 
   return (
-    <div className="p-8">
-      <Button>Hello</Button>
+    <div className="p-8 flex flex-col gap-4">
+      <Menubar>
+        <MenubarMenu>
+          <MenubarTrigger>File</MenubarTrigger>
+          <MenubarContent>
+            <MenubarItem>Open File</MenubarItem>
+          </MenubarContent>
+        </MenubarMenu>
+      </Menubar>
       <Grid
         columnDefs={columnDefs}
         rowData={rowData}
