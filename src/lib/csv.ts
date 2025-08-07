@@ -1,8 +1,8 @@
 import Papa from "papaparse";
 
 import { downloadFile, loadFile } from "./utils";
-import { Cell, HeaderCell } from "@/components/grid";
 import { useGridStore } from "@/stores";
+import { makeColumnDef } from "./grid";
 
 export const loadCsv = () =>
   loadFile((file) => {
@@ -10,21 +10,12 @@ export const loadCsv = () =>
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
-        const colDef = results.meta?.fields?.map((field) => {
-          return {
-            field: field,
-            headerName: field,
-            editable: true,
-            headerComponent: HeaderCell,
-            cellRenderer: Cell,
-          };
-        });
+        const colDef = results.meta?.fields?.map((field) =>
+          makeColumnDef(field, field, { editable: true })
+        );
 
         useGridStore.setState({
-          columnDefs: [
-            ...useGridStore.getState().columnDefs,
-            ...(colDef ?? []),
-          ],
+          columnDefs: colDef ?? [],
           rowData: results.data,
         });
       },
