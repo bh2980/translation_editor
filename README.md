@@ -1,69 +1,186 @@
-# React + TypeScript + Vite
+# 게임 스크립트 번역 에디터 요구사항 명세서
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## 1. 프로젝트 개요
 
-Currently, two official plugins are available:
+### 목적
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+게임 스크립트 번역 작업을 효율적으로 수행할 수 있는 전용 에디터 개발
 
-## Expanding the ESLint configuration
+### 개발 범위
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+- **1단계**: 웹 기반 기본 에디터
+- **2단계**: Electron 데스크톱 버전
+- **3단계**: 플러그인 시스템 (Benplex 연동 등)
 
-```js
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+## 2. 기능 요구사항
 
-      // Remove tseslint.configs.recommended and replace with this
-      ...tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      ...tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      ...tseslint.configs.stylisticTypeChecked,
+### 2.1 데이터 관리
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- [x] CSV 파일 가져오기/내보내기
+- [ ] 다양한 인코딩 지원 (UTF-8, EUC-KR 등)
+- [ ] 최근 파일 목록 관리(Desktop)
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### 2.2 편집 기능
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- [x] AG Grid 기반 스프레드시트 인터페이스
+- [ ] 인라인 편집, 행/열 크기 조절 (AG Grid 기본 기능 활용)
+- [ ] 행/열 추가/삭제
+- [ ] 실행 취소/다시 실행
+- [ ] 찾기 및 바꾸기
+- [ ] 복사/붙여넣기
 
-export default tseslint.config([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+### 2.3 태그 시스템
+
+- [ ] 태그 자동 인식 및 색상 하이라이트
+- [ ] 지원 태그: `<b>`, `<i>`, `<color>`, `<size>`, 사용자 정의 태그
+- [ ] 텍스트 선택 후 태그 감싸기 기능
+- [ ] 태그 제거 기능
+- [ ] 태그 유효성 검증
+
+### 2.4 번역 지원
+
+- [ ] LLM API 연동 (OpenAI, Claude, Gemini)
+- [ ] 선택 영역/전체/미번역만 번역
+- [ ] 원문을 번역문으로 복사
+- [ ] 번역 엔진 선택
+
+### 2.5 UI/UX
+
+- [ ] 메뉴바 (파일, 편집, 번역, 태그, 보기, 도구, 도움말)
+- [ ] 툴바 (자주 사용하는 기능들)
+- [ ] 사이드 패널 (선택된 셀 정보, 태그 도구, 설정)
+- [ ] 상태 표시줄 (진행률, 통계, 연결 상태)
+- [ ] 컨텍스트 메뉴 (우클릭 메뉴)
+
+### 2.6 품질 관리
+
+- [ ] 번역 상태 관리 (미번역, 번역완료, 검토완료, 승인완료)
+- [ ] 진행률 표시
+- [ ] 태그 불일치 검사
+- [ ] 통계 및 진행 상황 보고서
+
+### 2.7 데이터 정리 도구
+
+- [ ] 앞뒤 공백 제거
+- [ ] 빈 행 삭제
+- [ ] 중복 항목 제거
+- [ ] 줄바꿈 정규화
+
+## 3. 기술적 요구사항
+
+### 3.1 웹 버전
+
+- **Frontend**: React + TypeScript
+- **UI**: Tailwind CSS + shadcn/ui
+- **테이블**: AG Grid Community
+- **상태 관리**: Zustand 또는 Context API
+- **파일 처리**: Papa Parse (CSV)
+
+### 3.2 데스크톱 버전
+
+- **프레임워크**: Electron
+- **데이터베이스**: SQLite (로컬 저장)
+- **파일 시스템**: 직접 접근
+
+### 3.3 플러그인 시스템
+
+- 플러그인 인터페이스 정의
+- IPC 통신 (Named Pipes/TCP Socket)
+- Benplex C# 애플리케이션 연동
+
+## 4. 사용자 시나리오
+
+### 4.1 기본 번역 작업 플로우
+
+1. CSV 파일 가져오기
+2. 원문 확인 및 태그 인식
+3. 번역문 작성 (수동/AI 번역)
+4. 태그 유효성 검증
+5. 번역 상태 업데이트
+6. CSV 파일로 내보내기
+
+### 4.2 대량 번역 작업
+
+1. 전체 또는 선택 영역 AI 번역
+2. 번역 결과 검토 및 수정
+3. 품질 검증
+4. 일괄 상태 업데이트
+
+### 4.3 태그 작업
+
+1. 원문에서 태그 자동 인식
+2. 번역문에서 텍스트 선택
+3. 태그 감싸기 또는 제거
+4. 태그 불일치 검사 및 수정
+
+## 5. 성능 요구사항
+
+- 10,000개 이상 행 처리 가능
+- 실시간 태그 하이라이트
+- 빠른 검색 및 필터링
+- 메모리 효율적 사용
+
+## 6. 호환성 요구사항
+
+- 모던 웹 브라우저 지원 (Chrome, Firefox, Safari, Edge)
+- Windows, macOS, Linux (데스크톱 버전)
+- CSV UTF-8, EUC-KR 인코딩
+
+## 7. 보안 요구사항
+
+- LLM API 키 안전한 저장
+- 로컬 데이터 암호화 (데스크톱 버전)
+- 사용자 데이터 외부 전송 최소화
+
+## 8. 개발 우선순위
+
+### Phase 1 - MVP (2주)
+
+- CSV 가져오기/내보내기
+- AG Grid 기본 편집
+- 태그 하이라이트
+
+### Phase 2 - 핵심 기능 (2주)
+
+- 태그 감싸기/제거
+- OpenAI API 연동
+- 기본 검색/필터
+
+### Phase 3 - 완성도 향상 (2주)
+
+- 전체 UI/UX 구현
+- 품질 검증 기능
+- 데이터 정리 도구
+
+### Phase 4 - 데스크톱 (4주)
+
+- Electron 포팅
+- 로컬 파일 시스템
+- 설정 저장
+
+### Phase 5 - 확장 기능 (2주)
+
+- 플러그인 시스템
+- Benplex 연동
+
+**총 예상 개발 기간**: 12주 (3개월)
+
+## 9. 추가 고려사항
+
+### 확장성
+
+- 다양한 파일 형식 지원 준비 (JSON, XLSX)
+- 다국어 인터페이스 준비
+- 클라우드 동기화 가능성
+
+### 사용성
+
+- 키보드 단축키 충분히 제공
+- 번역가 워크플로우 최적화
+- 직관적인 인터페이스
+
+### 유지보수성
+
+- 모듈화된 코드 구조
+- 타입 안전성 (TypeScript)
+- 테스트 코드 작성
