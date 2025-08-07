@@ -122,6 +122,8 @@
   body {
     @apply bg-background text-foreground;
   }
+
+  /* ag-grid */
   .ag-header-cell,
   .ag-cell {
     padding: 0 !important;
@@ -131,5 +133,8 @@
     span {
       height: 100%;
     }
+  }
+  .ag-selection-checkbox {
+    @apply ml-4;
   }
 }
