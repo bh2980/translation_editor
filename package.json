@@ -11,9 +11,11 @@
   },
   "dependencies": {
     "@ag-grid-community/locale": "^34.1.1",
+    "@hookform/resolvers": "^5.2.1",
     "@lemoncloud/react-overlay": "^0.0.3",
     "@radix-ui/react-context-menu": "^2.2.15",
     "@radix-ui/react-dialog": "^1.1.14",
+    "@radix-ui/react-label": "^2.1.7",
     "@radix-ui/react-menubar": "^1.1.15",
     "@radix-ui/react-slot": "^1.2.3",
     "@tailwindcss/vite": "^4.1.11",
@@ -25,8 +27,10 @@
     "papaparse": "^5.5.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-hook-form": "^7.62.0",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.11",
+    "zod": "^4.0.15",
     "zustand": "^5.0.7"
   },
   "devDependencies": {
