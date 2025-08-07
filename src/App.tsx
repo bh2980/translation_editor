@@ -1,20 +1,33 @@
 import { type ColDef } from "ag-grid-community";
 import {
-  Button,
-  Grid,
+  Dialog,
+  DialogClose,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  Input,
   Menubar,
   MenubarContent,
   MenubarItem,
   MenubarMenu,
   MenubarTrigger,
 } from "@/ui";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Papa from "papaparse";
 import { downloadFile, loadFile } from "./lib/utils";
+import { Cell, Grid, HeaderCell } from "./components/grid";
 
 export const App = () => {
-  const [columnDefs, setColumnDefs] = useState<ColDef[]>([]);
+  const [columnDefs, setColumnDefs] = useState<ColDef[]>([
+    { headerName: "", checkboxSelection: true, width: 50 },
+  ]);
   const [rowData, setRowData] = useState<unknown[]>([]);
+
+  const columnKeyInputRef = useRef<HTMLInputElement>(null);
+  const columnNameInputRef = useRef<HTMLInputElement>(null);
 
   const loadCsv = () =>
     loadFile((file) => {
@@ -26,13 +39,13 @@ export const App = () => {
             return {
               field: field,
               headerName: field,
-              sortable: true,
-              filter: true,
               editable: true,
+              headerComponent: HeaderCell,
+              cellRenderer: Cell,
             };
           });
 
-          setColumnDefs(colDef ?? []);
+          setColumnDefs((prev) => [...prev, ...(colDef ?? [])]);
           setRowData(results.data);
         },
       });
@@ -49,11 +62,16 @@ export const App = () => {
   };
 
   const addColumn = () => {
-    setColumnDefs([
-      ...columnDefs,
+    const key = columnKeyInputRef.current?.value;
+    const name = columnNameInputRef.current?.value;
+
+    if (!key || !name) return;
+
+    setColumnDefs((prev) => [
+      ...prev,
       {
-        field: "newColumn",
-        headerName: "New Column",
+        field: key,
+        headerName: name,
         sortable: true,
         filter: true,
         editable: true,
@@ -62,7 +80,7 @@ export const App = () => {
   };
 
   return (
-    <div className="p-8 flex flex-col gap-4 items-baseline">
+    <div className="p-8 flex flex-col gap-4 items-baseline h-full">
       <Menubar>
         <MenubarMenu>
           <MenubarTrigger>File</MenubarTrigger>
@@ -72,12 +90,41 @@ export const App = () => {
           </MenubarContent>
         </MenubarMenu>
       </Menubar>
-      <Button onClick={addColumn}>열 추가</Button>
+
+      <Dialog>
+        <DialogTrigger>열 추가</DialogTrigger>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Add Column</DialogTitle>
+          </DialogHeader>
+          <DialogDescription className="grid grid-cols-2 gap-2">
+            <label>Column Key</label>
+            <Input
+              type="text"
+              placeholder="Column Key"
+              ref={columnKeyInputRef}
+            />
+            <label>Column Name</label>
+            <Input
+              type="text"
+              placeholder="Column Name"
+              ref={columnNameInputRef}
+            />
+          </DialogDescription>
+          <DialogFooter>
+            <DialogClose>Cancel</DialogClose>
+            <DialogClose onClick={addColumn}>Add</DialogClose>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       <Grid
         columnDefs={columnDefs}
         rowData={rowData}
-        domLayout="autoHeight"
-        className="w-full"
+        domLayout="normal"
+        className="w-full h-full"
+        enableCellTextSelection
+        rowSelection="multiple"
       />
     </div>
   );
