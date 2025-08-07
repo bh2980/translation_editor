@@ -12,6 +12,7 @@ import {
   DialogHeader,
   DialogTitle,
   Input,
+  Label,
 } from "@/ui";
 import type { CustomHeaderProps } from "ag-grid-react";
 import { insert } from "@/lib/utils";
@@ -26,11 +27,7 @@ interface AddColumnDialogProps extends OverlayProps {
   direction: "left" | "right";
 }
 
-export const AddColumnDialog = ({
-  column,
-  direction,
-  ...overlayProps
-}: AddColumnDialogProps) => {
+export const AddColumnDialog = ({ column, direction, ...overlayProps }: AddColumnDialogProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const setColumnDefs = useGridStore((state) => state.setColumnDefs);
 
@@ -44,17 +41,10 @@ export const AddColumnDialog = ({
     const currentColId = column.getColId();
 
     setColumnDefs((prev: ColDef[]) => {
-      const currentIndex = prev.findIndex(
-        (col: ColDef) => col.field === currentColId
-      );
-      const targetIndex =
-        direction === "left" ? currentIndex : currentIndex + 1;
+      const currentIndex = prev.findIndex((col: ColDef) => col.field === currentColId);
+      const targetIndex = direction === "left" ? currentIndex : currentIndex + 1;
 
-      return insert(
-        prev,
-        targetIndex,
-        makeColumnDef(columnName, columnName)
-      ) as ColDef[];
+      return insert(prev, targetIndex, makeColumnDef(columnName, columnName)) as ColDef[];
     });
   };
 
@@ -62,9 +52,10 @@ export const AddColumnDialog = ({
     <Dialog {...overlayProps}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>열 추가하기</DialogTitle>
+          <DialogTitle>{direction === "left" ? "왼쪽" : "오른쪽"}에 열 추가하기</DialogTitle>
         </DialogHeader>
         <DialogDescription>
+          <Label>열 이름</Label>
           <Input type="text" placeholder="Column Name" ref={inputRef} />
         </DialogDescription>
         <DialogFooter>
@@ -80,19 +71,14 @@ interface RemoveColumnDialogProps extends OverlayProps {
   column: Column;
 }
 
-export const RemoveColumnDialog = ({
-  column,
-  ...overlayProps
-}: RemoveColumnDialogProps) => {
+export const RemoveColumnDialog = ({ column, ...overlayProps }: RemoveColumnDialogProps) => {
   const setColumnDefs = useGridStore((state) => state.setColumnDefs);
 
   const removeColumn = () => {
     const currentColId = column.getColId();
 
     setColumnDefs((prev: ColDef[]) => {
-      return prev.filter(
-        (col: ColDef) => col.field !== currentColId
-      ) as ColDef[];
+      return prev.filter((col: ColDef) => col.field !== currentColId) as ColDef[];
     });
   };
 
@@ -100,7 +86,7 @@ export const RemoveColumnDialog = ({
     <Dialog {...overlayProps}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>열 삭제하기</DialogTitle>
+          <DialogTitle>{column.getColId()} 열 삭제하기</DialogTitle>
         </DialogHeader>
         <DialogDescription>
           <p>정말 삭제하시겠습니까?</p>
@@ -123,19 +109,11 @@ export const HeaderCell = (props: CustomHeaderProps) => {
 
   return (
     <ContextMenu>
-      <ContextMenuTrigger className="h-full w-full flex items-center px-3">
-        {props.displayName}
-      </ContextMenuTrigger>
+      <ContextMenuTrigger className="h-full w-full flex items-center px-3">{props.displayName}</ContextMenuTrigger>
       <ContextMenuContent>
         <ContextMenuItem
           onClick={() =>
-            overlay.open((overlayProps) => (
-              <AddColumnDialog
-                {...overlayProps}
-                column={props.column}
-                direction="left"
-              />
-            ))
+            overlay.open((overlayProps) => <AddColumnDialog {...overlayProps} column={props.column} direction="left" />)
           }
         >
           왼쪽에 열 추가
@@ -143,22 +121,14 @@ export const HeaderCell = (props: CustomHeaderProps) => {
         <ContextMenuItem
           onClick={() =>
             overlay.open((overlayProps) => (
-              <AddColumnDialog
-                {...overlayProps}
-                column={props.column}
-                direction="right"
-              />
+              <AddColumnDialog {...overlayProps} column={props.column} direction="right" />
             ))
           }
         >
           오른쪽에 열 추가
         </ContextMenuItem>
         <ContextMenuItem
-          onClick={() =>
-            overlay.open((overlayProps) => (
-              <RemoveColumnDialog {...overlayProps} column={props.column} />
-            ))
-          }
+          onClick={() => overlay.open((overlayProps) => <RemoveColumnDialog {...overlayProps} column={props.column} />)}
         >
           열 삭제
         </ContextMenuItem>
