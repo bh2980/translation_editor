@@ -34,3 +34,7 @@ export const downloadFile = (file: Blob | MediaSource, filename: string) => {
   a.click();
   URL.revokeObjectURL(url);
 };
+
+export const insert = (array: unknown[], index: number, value: unknown) => {
+  return [...array.slice(0, index), value, ...array.slice(index)];
+};
