@@ -12,19 +12,22 @@ import {
 } from "@/ui";
 import type { ColDef, Column } from "ag-grid-community";
 import { makeColumnDef } from "@/lib/grid";
-import { useOverlay } from "@lemoncloud/react-overlay";
 import type { OverlayProps } from "@lemoncloud/react-overlay/src/types";
 import { useRef } from "react";
 import { insert } from "@/lib/utils";
 
 interface AddColumnDialogProps extends OverlayProps {
-  column: Column;
+  column?: Column;
   direction: "left" | "right";
 }
 
 export const AddColumnDialog = ({ column, direction, ...overlayProps }: AddColumnDialogProps) => {
   const inputRef = useRef<HTMLInputElement>(null);
   const setColumnDefs = useGridStore((state) => state.setColumnDefs);
+
+  if (!column) {
+    return null;
+  }
 
   const addColumn = () => {
     if (!inputRef.current?.value) {
