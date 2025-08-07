@@ -6,11 +6,14 @@ import { App } from "./App";
 import { ModuleRegistry, AllCommunityModule } from "ag-grid-community";
 import "ag-grid-community/styles/ag-grid.css";
 import "ag-grid-community/styles/ag-theme-alpine.css";
+import { OverlayProvider } from "@lemoncloud/react-overlay";
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <App />
+    <OverlayProvider>
+      <App />
+    </OverlayProvider>
   </StrictMode>
 );
