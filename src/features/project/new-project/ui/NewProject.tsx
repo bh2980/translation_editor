@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronLeft, Upload, X } from "lucide-react";
 import { FileMappingDialog } from "@/components/file-mapping-dialog";
-import { parseSpreadsheet } from "@/lib/parse-spreadsheet";
+import { parseSpreadsheet } from "@/features/project/new-project/lib/parse-spreadsheet";
 import { createEmptyProject, saveProject, createBlankProject } from "@/entities/project/lib/storage";
 import type { Project, ParsedRow } from "@/types";
 import { v4 as uuidv4 } from "@/lib/uuid";
