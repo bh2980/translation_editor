@@ -2,8 +2,8 @@
 
 import { useState } from "react"
 import type { TranslationStatus } from "@/types"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { Button } from "@/shared/ui/button"
+import { Input } from "@/shared/ui/input"
 import { Trash2 } from "lucide-react"
 
 const PALETTE = [

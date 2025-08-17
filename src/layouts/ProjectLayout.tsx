@@ -1,6 +1,6 @@
 import type { ReactNode } from "react"
 import { Link, Outlet, useParams } from "react-router-dom"
-import { Button } from "@/components/ui/button"
+import { Button } from "@/shared/ui/button"
 import { Settings, BookText, Table2, User, Bot, BarChart3 } from "lucide-react"
 
 export default function ProjectLayout({ children }: { children?: ReactNode }) {

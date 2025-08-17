@@ -3,8 +3,8 @@
 import { useEffect, useState, useMemo } from "react"
 import { useParams } from "react-router-dom"
 import type { DashboardWidget } from "@/types"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card"
+import { Button } from "@/shared/ui/button"
 import { Settings, TrendingUp, FileText, BookOpen, Zap } from "lucide-react"
 import {
   PieChart,
@@ -18,8 +18,8 @@ import {
   LineChart,
   Line,
 } from "recharts"
-import { Switch } from "@/components/ui/switch"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { Switch } from "@/shared/ui/switch"
+import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover"
 import { useProjectStore } from "@/stores/project-store"
 
 const COLORS = {

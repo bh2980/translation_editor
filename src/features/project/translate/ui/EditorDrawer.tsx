@@ -1,9 +1,9 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/shared/ui/sheet"
+import { Textarea } from "@/shared/ui/textarea"
+import { Button } from "@/shared/ui/button"
 import type { GlossaryTerm, Project, TranslationEntry } from "@/types"
 import { TokenizedText, extractTokens, findMissingTokens } from "@/shared/lib/tokenize"
 import { Wand2, Save } from "lucide-react"

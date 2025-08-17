@@ -10,12 +10,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronLeft, Upload, X } from "lucide-react";
-import { FileMappingDialog } from "@/components/file-mapping-dialog";
+import { FileMappingDialog } from "@/features/project/new-project/ui/FileMappingDialog";
 import { parseSpreadsheet } from "@/features/project/new-project/lib/parse-spreadsheet";
 import { createEmptyProject, saveProject, createBlankProject } from "@/entities/project/lib/storage";
 import type { Project, ParsedRow } from "@/types";
 import { v4 as uuidv4 } from "@/shared/lib/uuid";
-import { Spinner } from "@/components/spinner";
+import { Spinner } from "@/shared/ui/spinner";
 import { useProjectStore } from "@/stores/project-store";
 
 const LANGS = [
