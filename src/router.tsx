@@ -9,7 +9,7 @@ import ProjectLayout from '@/layouts/ProjectLayout'
 import DashboardPage from '@/features/project/dashboard/ui/Dashboard'
 import TranslatePage from '@/features/project/translate/ui/Translate'
 import ProfilesPage from '@/features/project/profiles/ui/Profiles'
-import GlossaryPage from '@/pages/project/Glossary'
+import GlossaryPage from '@/features/project/glossary/ui/Glossary'
 import AIAgentPage from '@/pages/project/AIAgent'
 import SettingsPage from '@/pages/project/Settings'
 
