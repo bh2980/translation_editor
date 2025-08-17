@@ -1,6 +1,6 @@
 "use client"
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/shared/lib/utils"
 
 export function Spinner({ className }: { className?: string }) {
   return (
