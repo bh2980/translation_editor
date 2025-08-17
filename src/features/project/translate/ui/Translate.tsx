@@ -39,7 +39,7 @@ import {
   SelectContent as SContent,
   SelectItem as SItem,
 } from "@/components/ui/select"
-import { exportObjectsToCsv } from "@/lib/csv"
+import { exportObjectsToCsv } from "@/shared/lib/csv"
 import { useProjectStore } from "@/stores/project-store"
 
 export default function TranslatePage() {

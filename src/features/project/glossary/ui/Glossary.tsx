@@ -11,7 +11,7 @@ import { ColGroup, ResizableHeaderCell, useResizableColumns } from "@/components
 import { GlossaryImportDialog } from "@/components/glossary-import-dialog"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { exportObjectsToCsv } from "@/lib/csv"
+import { exportObjectsToCsv } from "@/shared/lib/csv"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/hooks/use-toast"
 import { useProjectStore } from "@/stores/project-store"
