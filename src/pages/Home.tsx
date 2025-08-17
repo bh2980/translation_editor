@@ -1,34 +1,34 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Plus, UploadCloud, FolderOpen, FileText, ArrowRight, Trash2 } from "lucide-react"
-import { useEffect, useMemo, useState } from "react"
-import { loadAllProjects, importProjectFromFile, deleteProject } from "@/lib/storage"
-import type { Project } from "@/lib/types"
-import { Link, useNavigate } from "react-router-dom"
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Plus, UploadCloud, FolderOpen, FileText, ArrowRight, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { loadAllProjects, importProjectFromFile, deleteProject } from "@/lib/storage";
+import type { Project } from "@/lib/types";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function HomePage() {
-  const [projects, setProjects] = useState<Project[]>([])
-  const navigate = useNavigate()
+  const [projects, setProjects] = useState<Project[]>([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    setProjects(loadAllProjects().sort((a, b) => b.updatedAt - a.updatedAt))
-  }, [])
+    setProjects(loadAllProjects().sort((a, b) => b.updatedAt - a.updatedAt));
+  }, []);
 
   async function onImportJSON(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const proj = await importProjectFromFile(file)
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const proj = await importProjectFromFile(file);
     if (proj) {
-      navigate(`/project/${proj.id}/translate`)
+      navigate(`/project/${proj.id}/translate`);
     }
   }
 
-  const recent = useMemo(() => projects.slice(0, 6), [projects])
+  const recent = useMemo(() => projects.slice(0, 6), [projects]);
 
   return (
     <main className="mx-auto max-w-6xl px-6 py-10">
@@ -51,7 +51,14 @@ export default function HomePage() {
                 <Plus size={16} />새 프로젝트
               </Button>
             </Link>
-
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader>
+            <CardTitle>기존 프로젝트</CardTitle>
+            <CardDescription>기존 프로젝트 파일을 불러와 적용합니다.</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-wrap gap-3">
             <div>
               <label htmlFor="import-json" className="inline-flex">
                 <Button variant="outline" className="gap-2 bg-transparent" asChild>
@@ -72,9 +79,9 @@ export default function HomePage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="col-span-2">
           <CardHeader>
-            <CardTitle>기존 프로젝트</CardTitle>
+            <CardTitle>최근 프로젝트</CardTitle>
             <CardDescription>최근에 작업한 프로젝트에 다시 접속합니다.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -103,8 +110,8 @@ export default function HomePage() {
                         size="icon"
                         className="text-red-600 hover:text-red-700"
                         onClick={() => {
-                          deleteProject(p.id)
-                          setProjects(loadAllProjects())
+                          deleteProject(p.id);
+                          setProjects(loadAllProjects());
                         }}
                         aria-label="프로젝트 삭제"
                       >
@@ -118,34 +125,6 @@ export default function HomePage() {
           </CardContent>
         </Card>
       </section>
-
-      <section className="mt-12">
-        <Card>
-          <CardHeader>
-            <CardTitle>프로젝트 가져오기</CardTitle>
-            <CardDescription>로컬 JSON 백업 파일을 가져와 프로젝트를 복원합니다.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="flex items-center gap-3">
-              <label htmlFor="import-json-2" className="inline-flex">
-                <Button variant="outline" className="gap-2 bg-transparent" asChild>
-                  <span>
-                    <FolderOpen size={16} />
-                    JSON 선택
-                  </span>
-                </Button>
-              </label>
-              <Input
-                id="import-json-2"
-                type="file"
-                accept="application/json"
-                className="hidden"
-                onChange={onImportJSON}
-              />
-            </div>
-          </CardContent>
-        </Card>
-      </section>
     </main>
-  )
+  );
 }
