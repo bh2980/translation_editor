@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ChevronLeft, Upload, X } from "lucide-react";
 import { FileMappingDialog } from "@/components/file-mapping-dialog";
 import { parseSpreadsheet } from "@/lib/parse-spreadsheet";
-import { createEmptyProject, saveProject, createBlankProject } from "@/lib/storage";
+import { createEmptyProject, saveProject, createBlankProject } from "@/entities/project/lib/storage";
 import type { Project, ParsedRow } from "@/types";
 import { v4 as uuidv4 } from "@/lib/uuid";
 import { Spinner } from "@/components/spinner";

@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { exportProjectToFile } from "@/lib/storage"
+import { exportProjectToFile } from "@/entities/project/lib/storage"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"

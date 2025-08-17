@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { saveProject } from "@/lib/storage"
+import { saveProject } from "@/entities/project/lib/storage"
 import type { Project, AIProvider } from "@/types"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
