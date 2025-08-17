@@ -6,7 +6,7 @@ import NewProjectPage from '@/features/project/new-project/ui/NewProject'
 
 // Project layout + nested pages
 import ProjectLayout from '@/layouts/ProjectLayout'
-import DashboardPage from '@/pages/project/Dashboard'
+import DashboardPage from '@/features/project/dashboard/ui/Dashboard'
 import TranslatePage from '@/features/project/translate/ui/Translate'
 import ProfilesPage from '@/pages/project/Profiles'
 import GlossaryPage from '@/pages/project/Glossary'
