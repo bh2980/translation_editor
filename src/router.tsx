@@ -2,7 +2,7 @@ import { createBrowserRouter, Navigate } from 'react-router-dom'
 
 // Top-level pages
 import HomePage from '@/pages/Home'
-import NewProjectPage from '@/pages/project/NewProject'
+import NewProjectPage from '@/features/project/new-project/ui/NewProject'
 
 // Project layout + nested pages
 import ProjectLayout from '@/layouts/ProjectLayout'
