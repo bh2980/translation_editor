@@ -10,7 +10,7 @@ import DashboardPage from '@/features/project/dashboard/ui/Dashboard'
 import TranslatePage from '@/features/project/translate/ui/Translate'
 import ProfilesPage from '@/features/project/profiles/ui/Profiles'
 import GlossaryPage from '@/features/project/glossary/ui/Glossary'
-import AIAgentPage from '@/pages/project/AIAgent'
+import AIAgentPage from '@/features/project/ai-agent/ui/AIAgent'
 import SettingsPage from '@/pages/project/Settings'
 
 const router = createBrowserRouter([
