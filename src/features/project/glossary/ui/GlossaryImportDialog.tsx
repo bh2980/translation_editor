@@ -14,7 +14,7 @@ import {
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select"
 import { Input } from "@/shared/ui/input"
 import type { GlossaryTerm } from "@/types"
-import { Spinner } from "./spinner"
+import { Spinner } from "@/shared/ui/spinner"
 
 export function GlossaryImportDialog({
   open,

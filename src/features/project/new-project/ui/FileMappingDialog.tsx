@@ -12,9 +12,9 @@ import {
 import { Button } from "@/shared/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 import type { ParsedRow } from "@/types";
-import { ColGroup, ResizableHeaderCell, useResizableColumns } from "./resizable-columns";
+import { ColGroup, ResizableHeaderCell, useResizableColumns } from "@/shared/ui/resizable-columns";
 import { Input } from "@/shared/ui/input";
-import { Spinner } from "./spinner";
+import { Spinner } from "@/shared/ui/spinner";
 
 export function FileMappingDialog({
   open,
