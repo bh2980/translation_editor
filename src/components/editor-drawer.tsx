@@ -5,7 +5,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
 import type { GlossaryTerm, Project, TranslationEntry } from "@/types"
-import { TokenizedText, extractTokens, findMissingTokens } from "@/lib/tokenize"
+import { TokenizedText, extractTokens, findMissingTokens } from "@/shared/lib/tokenize"
 import { Wand2, Save } from "lucide-react"
 
 export function EditorDrawer({
