@@ -1,36 +1,36 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
-import { exportProjectToFile } from "@/features/project/lib/storage"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
-import { StatusManager } from "@/features/project/settings/ui/StatusManager"
-import { Download } from "lucide-react"
-import { useProjectStore } from "@/stores/project-store"
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { exportProjectToFile } from "@/lib/storage";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { StatusManager } from "@/features/project/settings/ui/StatusManager";
+import { Download } from "lucide-react";
+import { useProjectStore } from "@/stores/project-store";
 
 export default function SettingsPage() {
-  const params = useParams<{ id: string }>()
-  const project = useProjectStore((s) => s.project)
-  const load = useProjectStore((s) => s.load)
-  const [name, setName] = useState("")
+  const params = useParams<{ id: string }>();
+  const project = useProjectStore((s) => s.project);
+  const load = useProjectStore((s) => s.load);
+  const [name, setName] = useState("");
 
   useEffect(() => {
-    if (!params?.id) return
-    load(params.id)
-  }, [params?.id, load])
+    if (!params?.id) return;
+    load(params.id);
+  }, [params?.id, load]);
 
   useEffect(() => {
-    setName(project?.name ?? "")
-  }, [project?.name])
+    setName(project?.name ?? "");
+  }, [project?.name]);
 
   function saveName() {
-    if (!project) return
-    useProjectStore.getState().update((p) => ({ ...p, name }))
+    if (!project) return;
+    useProjectStore.getState().update((p) => ({ ...p, name }));
   }
 
-  if (!project) return <div>프로젝트를 찾을 수 없습니다.</div>
+  if (!project) return <div>프로젝트를 찾을 수 없습니다.</div>;
 
   return (
     <div className="space-y-6">
@@ -60,11 +60,11 @@ export default function SettingsPage() {
           <StatusManager
             statuses={project.statuses}
             onChange={(next) => {
-              useProjectStore.getState().update((p) => ({ ...p, statuses: next }))
+              useProjectStore.getState().update((p) => ({ ...p, statuses: next }));
             }}
           />
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }

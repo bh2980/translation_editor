@@ -12,12 +12,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { ChevronLeft, Upload, X } from "lucide-react";
 import { FileMappingDialog } from "@/features/project/new-project/ui/FileMappingDialog";
 import { parseSpreadsheet } from "@/features/project/new-project/lib/parse-spreadsheet";
-import { createEmptyProject, saveProject, createBlankProject } from "@/features/project/lib/storage";
 import type { Project } from "@/features/project/types";
 import type { ParsedRow } from "@/types/common";
 import { v4 as uuidv4 } from "@/lib/uuid";
 import { Spinner } from "@/components/ui/spinner";
 import { useProjectStore } from "@/stores/project-store";
+import { createBlankProject, createEmptyProject, saveProject } from "@/lib/storage";
 
 const LANGS = [
   { code: "ko", label: "Korean (ko)" },

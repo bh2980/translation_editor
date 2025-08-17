@@ -1,6 +1,6 @@
+import { Project } from "@/features/project/types";
+import { loadProject, saveProject } from "@/lib/storage";
 import { create } from "zustand";
-import type { Project } from "../types";
-import { loadProject, saveProject } from "../entities/project/lib/storage";
 
 type ProjectState = {
   project: Project | null;

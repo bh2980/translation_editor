@@ -1,17 +1,17 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
-import { saveProject } from "@/features/project/lib/storage"
-import type { Project } from "@/features/project/types"
-import type { AIProvider } from "@/features/project/ai-agent/types"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useProjectStore } from "@/stores/project-store"
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import { saveProject } from "@/lib/storage";
+import type { Project } from "@/features/project/types";
+import type { AIProvider } from "@/features/project/ai-agent/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useProjectStore } from "@/stores/project-store";
 
 const DEFAULT_TEMPLATE = `You are a professional game localization translator.
 - Translate from {{sourceLang}} to {{targetLang}}.
@@ -19,7 +19,7 @@ const DEFAULT_TEMPLATE = `You are a professional game localization translator.
 - Use glossary consistently (source -> target): 
 {{glossary}}
 - Keep tone/style coherent with character profiles if provided.
-- Return ONLY the translated text without extra commentary.`
+- Return ONLY the translated text without extra commentary.`;
 
 const PROVIDER_OPTIONS = [
   { value: "openai", label: "OpenAI" },
@@ -27,7 +27,7 @@ const PROVIDER_OPTIONS = [
   { value: "claude", label: "Anthropic Claude" },
   { value: "gemini", label: "Google Gemini" },
   { value: "local", label: "Local LLM" },
-] as const
+] as const;
 
 const MODEL_OPTIONS = {
   openai: [
@@ -51,48 +51,48 @@ const MODEL_OPTIONS = {
     { value: "gemini-pro", label: "Gemini Pro" },
   ],
   local: [], // Custom input for local models
-}
+};
 
 export default function AIAgentPage() {
-  const params = useParams<{ id: string }>()
-  const project = useProjectStore((s) => s.project)
-  const load = useProjectStore((s) => s.load)
-  const [provider, setProvider] = useState<AIProvider>("openai")
-  const [apiKey, setApiKey] = useState("")
-  const [apiEndpoint, setApiEndpoint] = useState("")
-  const [model, setModel] = useState("")
-  const [customModel, setCustomModel] = useState("")
-  const [promptTemplate, setPromptTemplate] = useState(DEFAULT_TEMPLATE)
+  const params = useParams<{ id: string }>();
+  const project = useProjectStore((s) => s.project);
+  const load = useProjectStore((s) => s.load);
+  const [provider, setProvider] = useState<AIProvider>("openai");
+  const [apiKey, setApiKey] = useState("");
+  const [apiEndpoint, setApiEndpoint] = useState("");
+  const [model, setModel] = useState("");
+  const [customModel, setCustomModel] = useState("");
+  const [promptTemplate, setPromptTemplate] = useState(DEFAULT_TEMPLATE);
 
   useEffect(() => {
-    if (!params?.id) return
-    load(params.id)
-  }, [params?.id, load])
+    if (!params?.id) return;
+    load(params.id);
+  }, [params?.id, load]);
 
   useEffect(() => {
-    if (!project) return
-    setProvider(project.aiAgent.provider)
-    setApiKey(project.aiAgent.apiKey)
-    setApiEndpoint(project.aiAgent.apiEndpoint || "")
-    setModel(project.aiAgent.model)
-    setCustomModel(project.aiAgent.model)
-    setPromptTemplate(project.aiAgent.promptTemplate || DEFAULT_TEMPLATE)
-  }, [project?.id])
+    if (!project) return;
+    setProvider(project.aiAgent.provider);
+    setApiKey(project.aiAgent.apiKey);
+    setApiEndpoint(project.aiAgent.apiEndpoint || "");
+    setModel(project.aiAgent.model);
+    setCustomModel(project.aiAgent.model);
+    setPromptTemplate(project.aiAgent.promptTemplate || DEFAULT_TEMPLATE);
+  }, [project?.id]);
 
   // Reset model when provider changes
   useEffect(() => {
     if (provider === "local") {
-      setModel(customModel)
+      setModel(customModel);
     } else {
-      const options = MODEL_OPTIONS[provider]
+      const options = MODEL_OPTIONS[provider];
       if (options && options.length > 0) {
-        setModel(options[0].value)
+        setModel(options[0].value);
       }
     }
-  }, [provider, customModel])
+  }, [provider, customModel]);
 
   function save() {
-    if (!project) return
+    if (!project) return;
     useProjectStore.getState().update((p) => ({
       ...p,
       aiAgent: {
@@ -102,40 +102,40 @@ export default function AIAgentPage() {
         model: provider === "local" ? customModel : model,
         promptTemplate,
       },
-    }))
+    }));
   }
 
   function getProviderLabel(provider: AIProvider) {
-    return PROVIDER_OPTIONS.find((p) => p.value === provider)?.label || provider
+    return PROVIDER_OPTIONS.find((p) => p.value === provider)?.label || provider;
   }
 
   function getKeyLabel(provider: AIProvider) {
     switch (provider) {
       case "local":
-        return "API 엔드포인트"
+        return "API 엔드포인트";
       default:
-        return "API Key"
+        return "API Key";
     }
   }
 
   function getKeyPlaceholder(provider: AIProvider) {
     switch (provider) {
       case "openai":
-        return "sk-..."
+        return "sk-...";
       case "xai":
-        return "xai-..."
+        return "xai-...";
       case "claude":
-        return "sk-ant-..."
+        return "sk-ant-...";
       case "gemini":
-        return "AIza..."
+        return "AIza...";
       case "local":
-        return "http://localhost:11434/v1"
+        return "http://localhost:11434/v1";
       default:
-        return "API 키를 입력하세요"
+        return "API 키를 입력하세요";
     }
   }
 
-  if (!project) return <div>프로젝트를 찾을 수 없습니다.</div>
+  if (!project) return <div>프로젝트를 찾을 수 없습니다.</div>;
 
   return (
     <div className="space-y-6">
@@ -222,5 +222,5 @@ export default function AIAgentPage() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
