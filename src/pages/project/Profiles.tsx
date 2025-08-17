@@ -2,30 +2,26 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { loadProject, saveProject } from "@/lib/storage"
-import type { Project, Profile } from "@/lib/types"
+import type { Profile } from "@/types"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Plus, Trash2, User } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
+import { useProjectStore } from "@/stores/project-store"
 
 export default function ProfilesPage() {
   const params = useParams<{ id: string }>()
-  const [project, setProject] = useState<Project | null>(null)
+  const project = useProjectStore((s) => s.project)
+  const load = useProjectStore((s) => s.load)
   const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null)
   const { toast } = useToast()
 
   useEffect(() => {
     if (!params?.id) return
-    const p = loadProject(params.id)
-    setProject(p)
-    // Auto-select first profile if available
-    if (p?.profiles && p.profiles.length > 0) {
-      setSelectedProfile(p.profiles[0])
-    }
-  }, [params?.id])
+    load(params.id)
+  }, [params?.id, load])
 
   // Update selected profile when profiles change
   useEffect(() => {
@@ -42,9 +38,7 @@ export default function ProfilesPage() {
 
   function updateProfiles(profiles: Profile[]) {
     if (!project) return
-    const next = { ...project, profiles, updatedAt: Date.now() }
-    setProject(next)
-    saveProject(next)
+    useProjectStore.getState().update((p) => ({ ...p, profiles }))
   }
 
   function addProfile() {

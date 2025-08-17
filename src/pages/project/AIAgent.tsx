@@ -2,14 +2,15 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { loadProject, saveProject } from "@/lib/storage"
-import type { Project, AIProvider } from "@/lib/types"
+import { saveProject } from "@/lib/storage"
+import type { Project, AIProvider } from "@/types"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { useProjectStore } from "@/stores/project-store"
 
 const DEFAULT_TEMPLATE = `You are a professional game localization translator.
 - Translate from {{sourceLang}} to {{targetLang}}.
@@ -53,7 +54,8 @@ const MODEL_OPTIONS = {
 
 export default function AIAgentPage() {
   const params = useParams<{ id: string }>()
-  const [project, setProject] = useState<Project | null>(null)
+  const project = useProjectStore((s) => s.project)
+  const load = useProjectStore((s) => s.load)
   const [provider, setProvider] = useState<AIProvider>("openai")
   const [apiKey, setApiKey] = useState("")
   const [apiEndpoint, setApiEndpoint] = useState("")
@@ -63,16 +65,18 @@ export default function AIAgentPage() {
 
   useEffect(() => {
     if (!params?.id) return
-    const p = loadProject(params.id)
-    if (!p) return
-    setProject(p)
-    setProvider(p.aiAgent.provider)
-    setApiKey(p.aiAgent.apiKey)
-    setApiEndpoint(p.aiAgent.apiEndpoint || "")
-    setModel(p.aiAgent.model)
-    setCustomModel(p.aiAgent.model)
-    setPromptTemplate(p.aiAgent.promptTemplate || DEFAULT_TEMPLATE)
-  }, [params?.id])
+    load(params.id)
+  }, [params?.id, load])
+
+  useEffect(() => {
+    if (!project) return
+    setProvider(project.aiAgent.provider)
+    setApiKey(project.aiAgent.apiKey)
+    setApiEndpoint(project.aiAgent.apiEndpoint || "")
+    setModel(project.aiAgent.model)
+    setCustomModel(project.aiAgent.model)
+    setPromptTemplate(project.aiAgent.promptTemplate || DEFAULT_TEMPLATE)
+  }, [project?.id])
 
   // Reset model when provider changes
   useEffect(() => {
@@ -88,8 +92,8 @@ export default function AIAgentPage() {
 
   function save() {
     if (!project) return
-    const next = {
-      ...project,
+    useProjectStore.getState().update((p) => ({
+      ...p,
       aiAgent: {
         provider,
         apiKey,
@@ -97,10 +101,7 @@ export default function AIAgentPage() {
         model: provider === "local" ? customModel : model,
         promptTemplate,
       },
-      updatedAt: Date.now(),
-    }
-    setProject(next)
-    saveProject(next)
+    }))
   }
 
   function getProviderLabel(provider: AIProvider) {

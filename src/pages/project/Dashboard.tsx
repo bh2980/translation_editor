@@ -2,8 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react"
 import { useParams } from "react-router-dom"
-import { loadProject, saveProject } from "@/lib/storage"
-import type { Project, DashboardWidget } from "@/lib/types"
+import type { DashboardWidget } from "@/types"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Settings, TrendingUp, FileText, BookOpen, Zap } from "lucide-react"
@@ -21,6 +20,7 @@ import {
 } from "recharts"
 import { Switch } from "@/components/ui/switch"
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+import { useProjectStore } from "@/stores/project-store"
 
 const COLORS = {
   slate: "#64748b",
@@ -38,20 +38,13 @@ const DEFAULT_WIDGETS: DashboardWidget[] = [
 
 export default function DashboardPage() {
   const params = useParams<{ id: string }>()
-  const [project, setProject] = useState<Project | null>(null)
+  const project = useProjectStore((s) => s.project)
+  const load = useProjectStore((s) => s.load)
 
   useEffect(() => {
     if (!params?.id) return
-    const p = loadProject(params.id)
-    if (p && !p.dashboardWidgets) {
-      // Initialize default widgets if not present
-      const updated = { ...p, dashboardWidgets: DEFAULT_WIDGETS }
-      saveProject(updated)
-      setProject(updated)
-    } else {
-      setProject(p)
-    }
-  }, [params?.id])
+    load(params.id)
+  }, [params?.id, load])
 
   const widgets = useMemo(() => {
     return (project?.dashboardWidgets || DEFAULT_WIDGETS)
@@ -118,15 +111,12 @@ export default function DashboardPage() {
 
   function toggleWidget(widgetId: string) {
     if (!project) return
-    const updated = {
-      ...project,
-      dashboardWidgets: (project.dashboardWidgets || DEFAULT_WIDGETS).map((w) =>
+    useProjectStore.getState().update((p) => ({
+      ...p,
+      dashboardWidgets: (p.dashboardWidgets || DEFAULT_WIDGETS).map((w) =>
         w.id === widgetId ? { ...w, enabled: !w.enabled } : w,
       ),
-      updatedAt: Date.now(),
-    }
-    setProject(updated)
-    saveProject(updated)
+    }))
   }
 
   if (!project) return <div>프로젝트를 찾을 수 없습니다.</div>

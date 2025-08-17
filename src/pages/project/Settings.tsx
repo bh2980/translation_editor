@@ -2,31 +2,32 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { loadProject, saveProject, exportProjectToFile } from "@/lib/storage"
-import type { Project } from "@/lib/types"
+import { exportProjectToFile } from "@/lib/storage"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { StatusManager } from "@/components/status-manager"
 import { Download } from "lucide-react"
+import { useProjectStore } from "@/stores/project-store"
 
 export default function SettingsPage() {
   const params = useParams<{ id: string }>()
-  const [project, setProject] = useState<Project | null>(null)
+  const project = useProjectStore((s) => s.project)
+  const load = useProjectStore((s) => s.load)
   const [name, setName] = useState("")
 
   useEffect(() => {
     if (!params?.id) return
-    const p = loadProject(params.id)
-    setProject(p)
-    setName(p?.name ?? "")
-  }, [params?.id])
+    load(params.id)
+  }, [params?.id, load])
+
+  useEffect(() => {
+    setName(project?.name ?? "")
+  }, [project?.name])
 
   function saveName() {
     if (!project) return
-    const next = { ...project, name, updatedAt: Date.now() }
-    setProject(next)
-    saveProject(next)
+    useProjectStore.getState().update((p) => ({ ...p, name }))
   }
 
   if (!project) return <div>프로젝트를 찾을 수 없습니다.</div>
@@ -59,9 +60,7 @@ export default function SettingsPage() {
           <StatusManager
             statuses={project.statuses}
             onChange={(next) => {
-              const updated = { ...project, statuses: next, updatedAt: Date.now() }
-              setProject(updated)
-              saveProject(updated)
+              useProjectStore.getState().update((p) => ({ ...p, statuses: next }))
             }}
           />
         </CardContent>

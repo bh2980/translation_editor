@@ -2,8 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useParams } from "react-router-dom"
-import { loadProject, saveProject } from "@/lib/storage"
-import type { Project, GlossaryTerm } from "@/lib/types"
+import type { GlossaryTerm } from "@/types"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -15,10 +14,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { exportObjectsToCsv } from "@/lib/csv"
 import { Checkbox } from "@/components/ui/checkbox"
 import { useToast } from "@/hooks/use-toast"
+import { useProjectStore } from "@/stores/project-store"
 
 export default function GlossaryPage() {
   const params = useParams<{ id: string }>()
-  const [project, setProject] = useState<Project | null>(null)
+  const project = useProjectStore((s) => s.project)
+  const load = useProjectStore((s) => s.load)
   const [query, setQuery] = useState("")
   const [importOpen, setImportOpen] = useState(false)
   const [exportDelim, setExportDelim] = useState<string>(",")
@@ -60,9 +61,7 @@ export default function GlossaryPage() {
 
   function update(glossary: GlossaryTerm[]) {
     if (!project) return
-    const next = { ...project, glossary, updatedAt: Date.now() }
-    setProject(next)
-    saveProject(next)
+    useProjectStore.getState().update((p) => ({ ...p, glossary }))
   }
 
   function onImported(terms: GlossaryTerm[]) {
@@ -111,8 +110,8 @@ export default function GlossaryPage() {
 
   useEffect(() => {
     if (!params?.id) return
-    setProject(loadProject(params.id))
-  }, [params?.id])
+    load(params.id)
+  }, [params?.id, load])
 
   if (!project) return <div>프로젝트를 찾을 수 없습니다.</div>
 
