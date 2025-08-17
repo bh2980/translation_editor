@@ -1,16 +1,16 @@
-"use client"
-import { useEffect, useMemo, useRef, useState } from "react"
-import { Select } from "@/components/ui/select"
+"use client";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Select } from "@/components/ui/select";
 
-import { useParams } from "react-router-dom"
-import type { TranslationEntry } from "@/features/project/translate/types"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select as UiSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { statusColorToClass } from "@/components/ui/status-badge"
-import { Wand2, Search, Columns3, SlidersHorizontal, Download } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { Spinner } from "@/components/ui/spinner"
+import { useParams } from "react-router-dom";
+import type { TranslationEntry } from "@/features/translate/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Select as UiSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { statusColorToClass } from "@/components/ui/status-badge";
+import { Wand2, Search, Columns3, SlidersHorizontal, Download } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { Spinner } from "@/components/ui/spinner";
 import {
   flexRender,
   getCoreRowModel,
@@ -19,8 +19,8 @@ import {
   getSortedRowModel,
   getFilteredRowModel,
   type ColumnFiltersState,
-} from "@tanstack/react-table"
-import { Checkbox } from "@/components/ui/checkbox"
+} from "@tanstack/react-table";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -28,97 +28,102 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { EditorCellPopover, EditorDrawerLeft, EditorSplitView, type EditorMode } from "@/features/project/translate/ui/EditorPanel"
-import { TextColumnFilter, StatusColumnFilter } from "@/components/ui/column-filter"
-import { Switch } from "@/components/ui/switch"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
+} from "@/components/ui/dropdown-menu";
+import {
+  EditorCellPopover,
+  EditorDrawerLeft,
+  EditorSplitView,
+  type EditorMode,
+} from "@/features/translate/ui/EditorPanel";
+import { TextColumnFilter, StatusColumnFilter } from "@/components/ui/column-filter";
+import { Switch } from "@/components/ui/switch";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import {
   SelectTrigger as STrigger,
   SelectValue as SValue,
   SelectContent as SContent,
   SelectItem as SItem,
-} from "@/components/ui/select"
-import { exportObjectsToCsv } from "@/lib/csv"
-import { useProjectStore } from "@/stores/project-store"
+} from "@/components/ui/select";
+import { exportObjectsToCsv } from "@/lib/csv";
+import { useProjectStore } from "@/stores/project-store";
 
 export default function TranslatePage() {
-  const params = useParams<{ id: string }>()
-  const project = useProjectStore((s) => s.project)
-  const isLoading = useProjectStore((s) => s.isLoading)
-  const load = useProjectStore((s) => s.load)
-  const [globalFilter, setGlobalFilter] = useState("")
-  const [selected, setSelected] = useState<TranslationEntry | null>(null)
+  const params = useParams<{ id: string }>();
+  const project = useProjectStore((s) => s.project);
+  const isLoading = useProjectStore((s) => s.isLoading);
+  const load = useProjectStore((s) => s.load);
+  const [globalFilter, setGlobalFilter] = useState("");
+  const [selected, setSelected] = useState<TranslationEntry | null>(null);
   const [editorMode, setEditorMode] = useState<EditorMode>(() => {
     if (typeof window !== "undefined") {
-      return (localStorage.getItem("editor-mode") as EditorMode) || "popover"
+      return (localStorage.getItem("editor-mode") as EditorMode) || "popover";
     }
-    return "popover"
-  })
-  const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({})
-  const [highlightedCols, setHighlightedCols] = useState<Record<string, boolean>>({})
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+    return "popover";
+  });
+  const [rowSelection, setRowSelection] = useState<Record<string, boolean>>({});
+  const [highlightedCols, setHighlightedCols] = useState<Record<string, boolean>>({});
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
   const [autoNext, setAutoNext] = useState<boolean>(() => {
     if (typeof window !== "undefined") {
-      return localStorage.getItem("auto-next") === "1"
+      return localStorage.getItem("auto-next") === "1";
     }
-    return false
-  })
-  const [exportDelim, setExportDelim] = useState<string>(",")
+    return false;
+  });
+  const [exportDelim, setExportDelim] = useState<string>(",");
 
-  const targetCellRefs = useRef<Record<string, HTMLButtonElement | null>>({})
+  const targetCellRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   useEffect(() => {
-    if (!params?.id) return
-    load(params.id)
-  }, [params?.id, load])
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      localStorage.setItem("editor-mode", editorMode)
-    }
-  }, [editorMode])
+    if (!params?.id) return;
+    load(params.id);
+  }, [params?.id, load]);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      localStorage.setItem("auto-next", autoNext ? "1" : "0")
+      localStorage.setItem("editor-mode", editorMode);
     }
-  }, [autoNext])
+  }, [editorMode]);
 
-  const statuses = useMemo(() => project?.statuses ?? [], [project])
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("auto-next", autoNext ? "1" : "0");
+    }
+  }, [autoNext]);
+
+  const statuses = useMemo(() => project?.statuses ?? [], [project]);
 
   function updateEntry(update: TranslationEntry) {
-    if (!project) return
-    const idx = project.entries.findIndex((e) => e.id === update.id)
+    if (!project) return;
+    const idx = project.entries.findIndex((e) => e.id === update.id);
     if (idx >= 0) {
       useProjectStore.getState().update((p) => {
-        const next = { ...p }
-        next.entries[idx] = update
-        return next
-      })
+        const next = { ...p };
+        next.entries[idx] = update;
+        return next;
+      });
     }
   }
 
   function moveToNext(fromId: string) {
-    const idx = entries.findIndex((e) => e.id === fromId)
+    const idx = entries.findIndex((e) => e.id === fromId);
     if (idx >= 0 && idx + 1 < entries.length) {
-      const next = entries[idx + 1]
+      const next = entries[idx + 1];
       if (editorMode === "popover") {
         // Open next cell's popover
-        const btn = targetCellRefs.current[next.id]
+        const btn = targetCellRefs.current[next.id];
         if (btn) {
-          setTimeout(() => btn.click(), 10)
+          setTimeout(() => btn.click(), 10);
         }
       } else {
-        setSelected(next)
+        setSelected(next);
       }
     }
   }
 
   async function aiTranslateRow(entry: TranslationEntry) {
-    if (!project) return
+    if (!project) return;
     const res = await fetch("/api/translate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -132,26 +137,26 @@ export default function TranslatePage() {
         targetLang: project.targetLang,
         glossary: project.glossary,
       }),
-    })
+    });
     if (!res.ok) {
-      toast({ title: "AI 번역 실패", description: "설정을 확인해주세요.", variant: "destructive" })
-      return
+      toast({ title: "AI 번역 실패", description: "설정을 확인해주세요.", variant: "destructive" });
+      return;
     }
-    const data = await res.json()
-    const newEntry = { ...entry, target: data.text }
-    updateEntry(newEntry)
-    toast({ title: "AI 번역 완료", description: "번역 결과가 적용되었습니다." })
+    const data = await res.json();
+    const newEntry = { ...entry, target: data.text };
+    updateEntry(newEntry);
+    toast({ title: "AI 번역 완료", description: "번역 결과가 적용되었습니다." });
   }
 
   async function aiTranslateSelected() {
-    if (!project) return
-    const rows = table.getSelectedRowModel().flatRows
+    if (!project) return;
+    const rows = table.getSelectedRowModel().flatRows;
     if (rows.length === 0) {
-      toast({ title: "선택된 행이 없습니다.", description: "왼쪽 체크박스로 행을 선택하세요." })
-      return
+      toast({ title: "선택된 행이 없습니다.", description: "왼쪽 체크박스로 행을 선택하세요." });
+      return;
     }
     for (const r of rows) {
-      await aiTranslateRow(r.original)
+      await aiTranslateRow(r.original);
     }
   }
 
@@ -191,7 +196,7 @@ export default function TranslatePage() {
           </div>
         ),
         cell: ({ row }) => {
-          const e = row.original
+          const e = row.original;
           return (
             <UiSelect value={e.statusId} onValueChange={(val) => updateEntry({ ...e, statusId: val })}>
               <SelectTrigger className="h-8">
@@ -208,7 +213,7 @@ export default function TranslatePage() {
                 ))}
               </SelectContent>
             </UiSelect>
-          )
+          );
         },
         size: 160,
         filterFn: "equalsString",
@@ -249,12 +254,12 @@ export default function TranslatePage() {
           </div>
         ),
         cell: ({ row }) => {
-          const e = row.original
+          const e = row.original;
           const content = e.target ? (
             <span className="line-clamp-3">{e.target}</span>
           ) : (
             <span className="text-muted-foreground">클릭하여 번역 입력…</span>
-          )
+          );
 
           if (editorMode === "popover") {
             return (
@@ -267,19 +272,19 @@ export default function TranslatePage() {
               >
                 <button
                   ref={(el) => {
-                    targetCellRefs.current[e.id] = el
+                    targetCellRefs.current[e.id] = el;
                   }}
                   className="w-full rounded-md border bg-background px-2 py-1 text-left hover:bg-muted"
                 >
                   {content}
                 </button>
               </EditorCellPopover>
-            )
+            );
           }
           return (
             <button
               ref={(el) => {
-                targetCellRefs.current[e.id] = el
+                targetCellRefs.current[e.id] = el;
               }}
               className="w-full rounded-md border bg-background px-2 py-1 text-left hover:bg-muted"
               onClick={() => setSelected(e)}
@@ -287,7 +292,7 @@ export default function TranslatePage() {
             >
               {content}
             </button>
-          )
+          );
         },
         size: 520,
         filterFn: "includesString",
@@ -311,8 +316,8 @@ export default function TranslatePage() {
         enableColumnFilter: false,
       },
     ],
-    [statuses, project, editorMode, autoNext],
-  )
+    [statuses, project, editorMode, autoNext]
+  );
 
   const table = useReactTable({
     data: project?.entries ?? [],
@@ -330,40 +335,38 @@ export default function TranslatePage() {
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     globalFilterFn: (row, _columnId, filterValue: string) => {
-      if (!filterValue) return true
-      const q = String(filterValue).toLowerCase()
-      const e = row.original as TranslationEntry
+      if (!filterValue) return true;
+      const q = String(filterValue).toLowerCase();
+      const e = row.original as TranslationEntry;
       return (
-        e.key.toLowerCase().includes(q) ||
-        e.source.toLowerCase().includes(q) ||
-        e.target.toLowerCase().includes(q)
-      )
+        e.key.toLowerCase().includes(q) || e.source.toLowerCase().includes(q) || e.target.toLowerCase().includes(q)
+      );
     },
     columnResizeMode: "onChange",
-  })
+  });
 
   // Auto-select first row in Split View
   useEffect(() => {
-    if (editorMode !== "split") return
+    if (editorMode !== "split") return;
     if (!selected) {
-      const first = table.getRowModel().rows[0]?.original as TranslationEntry | undefined
-      if (first) setSelected(first)
+      const first = table.getRowModel().rows[0]?.original as TranslationEntry | undefined;
+      if (first) setSelected(first);
     }
-  }, [editorMode, selected, table])
+  }, [editorMode, selected, table]);
 
   function toggleHighlight(colId: string) {
-    setHighlightedCols((prev) => ({ ...prev, [colId]: !prev[colId] }))
+    setHighlightedCols((prev) => ({ ...prev, [colId]: !prev[colId] }));
   }
 
   function exportCsv() {
-    if (!project) return
+    if (!project) return;
     const csvData = project.entries.map((entry) => ({
       key: entry.key,
       source: entry.source,
       target: entry.target,
       status: statuses.find((status) => status.id === entry.statusId)?.name || "Unknown",
-    }))
-    exportObjectsToCsv(csvData, `${project.name}_translations.csv`)
+    }));
+    exportObjectsToCsv(csvData, `${project.name}_translations.csv`);
   }
 
   if (isLoading) {
@@ -374,11 +377,11 @@ export default function TranslatePage() {
           <span>프로젝트 로딩 중…</span>
         </div>
       </div>
-    )
+    );
   }
 
   if (!project) {
-    return <div>프로젝트를 찾을 수 없습니다.</div>
+    return <div>프로젝트를 찾을 수 없습니다.</div>;
   }
 
   const tableView = (
@@ -388,10 +391,10 @@ export default function TranslatePage() {
           {table.getHeaderGroups().map((hg) => (
             <tr key={hg.id} className="text-left">
               {hg.headers.map((header) => {
-                const colId = header.column.id
-                const isResizable = header.column.getCanResize()
-                const size = header.getSize()
-                const isFiltered = header.column.getIsFiltered()
+                const colId = header.column.id;
+                const isResizable = header.column.getCanResize();
+                const size = header.getSize();
+                const isFiltered = header.column.getIsFiltered();
                 return (
                   <th
                     key={header.id}
@@ -402,7 +405,7 @@ export default function TranslatePage() {
                         : ""
                     }`}
                     onClick={(e) => {
-                      if (e.metaKey || e.ctrlKey) toggleHighlight(colId)
+                      if (e.metaKey || e.ctrlKey) toggleHighlight(colId);
                     }}
                   >
                     {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
@@ -424,7 +427,7 @@ export default function TranslatePage() {
                       </>
                     )}
                   </th>
-                )
+                );
               })}
             </tr>
           ))}
@@ -433,13 +436,15 @@ export default function TranslatePage() {
           {table.getRowModel().rows.map((row) => (
             <tr
               key={row.id}
-              className={`border-t align-top ${editorMode === "split" && selected?.id === row.original.id ? "bg-muted/20" : ""}`}
+              className={`border-t align-top ${
+                editorMode === "split" && selected?.id === row.original.id ? "bg-muted/20" : ""
+              }`}
               onClick={() => {
-                if (editorMode === "split") setSelected(row.original)
+                if (editorMode === "split") setSelected(row.original);
               }}
             >
               {row.getVisibleCells().map((cell) => {
-                const colId = cell.column.id
+                const colId = cell.column.id;
                 return (
                   <td
                     key={cell.id}
@@ -448,14 +453,14 @@ export default function TranslatePage() {
                   >
                     {flexRender(cell.column.columnDef.cell, cell.getContext())}
                   </td>
-                )
+                );
               })}
             </tr>
           ))}
         </tbody>
       </table>
     </div>
-  )
+  );
 
   return (
     <div className="space-y-6">
@@ -583,22 +588,22 @@ export default function TranslatePage() {
                 </Select>
                 <Button
                   onClick={() => {
-                    if (!project) return
+                    if (!project) return;
                     // Export rows currently in the table (respects filters)
-                    const rows = table.getRowModel().rows.map((r) => r.original)
-                    const statusName = new Map(project.statuses.map((s) => [s.id, s.name]))
+                    const rows = table.getRowModel().rows.map((r) => r.original);
+                    const statusName = new Map(project.statuses.map((s) => [s.id, s.name]));
                     const payload = rows.map((e) => ({
                       key: e.key,
                       source: e.source,
                       target: e.target,
                       status: statusName.get(e.statusId) || "",
-                    }))
+                    }));
                     exportObjectsToCsv(`${project.name}_translations.csv`, payload, exportDelim, [
                       { key: "key", header: "key" },
                       { key: "source", header: "source" },
                       { key: "target", header: "target" },
                       { key: "status", header: "status" },
-                    ])
+                    ]);
                   }}
                   className="w-full"
                 >
@@ -623,9 +628,9 @@ export default function TranslatePage() {
             onOpenChange={(o) => !o && setSelected(null)}
             entry={selected}
             onSave={(upd) => {
-              updateEntry(upd)
-              if (autoNext) moveToNext(upd.id)
-              else setSelected(null)
+              updateEntry(upd);
+              if (autoNext) moveToNext(upd.id);
+              else setSelected(null);
             }}
             glossary={project.glossary}
             project={project}
@@ -638,8 +643,8 @@ export default function TranslatePage() {
             <EditorSplitView
               entry={selected}
               onSave={(upd) => {
-                updateEntry(upd)
-                if (autoNext) moveToNext(upd.id)
+                updateEntry(upd);
+                if (autoNext) moveToNext(upd.id);
               }}
               glossary={project.glossary}
               project={project}
@@ -648,5 +653,5 @@ export default function TranslatePage() {
         </div>
       )}
     </div>
-  )
+  );
 }

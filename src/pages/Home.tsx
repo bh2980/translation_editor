@@ -5,7 +5,7 @@ import type React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Plus, UploadCloud, FolderOpen, FileText, ArrowRight, Trash2 } from "lucide-react";
+import { Plus, UploadCloud, FileText, ArrowRight, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { loadAllProjects, importProjectFromFile, deleteProject } from "@/lib/storage";
 import type { Project } from "@/features/project/types";
@@ -38,7 +38,6 @@ export default function HomePage() {
           CSV, XLSX 스크립트를 불러와 매핑하고, 표 기반으로 번역하고, AI 도움을 받아 워크플로우를 가속하세요.
         </p>
       </header>
-
       <section className="grid gap-6 md:grid-cols-2">
         <Card>
           <CardHeader>
@@ -46,7 +45,7 @@ export default function HomePage() {
             <CardDescription>새로운 프로젝트를 생성하고 파일을 불러와 시작합니다.</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-wrap gap-3">
-            <Link to="/project/new">
+            <Link to="/project/setup">
               <Button className="gap-2">
                 <Plus size={16} />새 프로젝트
               </Button>

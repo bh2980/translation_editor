@@ -6,7 +6,7 @@ import { exportProjectToFile } from "@/lib/storage";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { StatusManager } from "@/features/project/settings/ui/StatusManager";
+import { StatusManager } from "@/features/project/ui/StatusManager";
 import { Download } from "lucide-react";
 import { useProjectStore } from "@/stores/project-store";
 

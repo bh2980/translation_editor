@@ -1,44 +1,44 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
-import type { Profile } from "@/features/project/profiles/types"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, Trash2, User } from "lucide-react"
-import { useToast } from "@/hooks/use-toast"
-import { useProjectStore } from "@/stores/project-store"
+import { useEffect, useState } from "react";
+import { useParams } from "react-router-dom";
+import type { Profile } from "@/features/profiles/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Plus, Trash2, User } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { useProjectStore } from "@/stores/project-store";
 
 export default function ProfilesPage() {
-  const params = useParams<{ id: string }>()
-  const project = useProjectStore((s) => s.project)
-  const load = useProjectStore((s) => s.load)
-  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null)
-  const { toast } = useToast()
+  const params = useParams<{ id: string }>();
+  const project = useProjectStore((s) => s.project);
+  const load = useProjectStore((s) => s.load);
+  const [selectedProfile, setSelectedProfile] = useState<Profile | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
-    if (!params?.id) return
-    load(params.id)
-  }, [params?.id, load])
+    if (!params?.id) return;
+    load(params.id);
+  }, [params?.id, load]);
 
   // Update selected profile when profiles change
   useEffect(() => {
     if (!project?.profiles || project.profiles.length === 0) {
-      setSelectedProfile(null)
-      return
+      setSelectedProfile(null);
+      return;
     }
 
     // If current selection is no longer in the list, select first one
     if (selectedProfile && !project.profiles.find((p) => p.id === selectedProfile.id)) {
-      setSelectedProfile(project.profiles[0])
+      setSelectedProfile(project.profiles[0]);
     }
-  }, [project?.profiles, selectedProfile])
+  }, [project?.profiles, selectedProfile]);
 
   function updateProfiles(profiles: Profile[]) {
-    if (!project) return
-    useProjectStore.getState().update((p) => ({ ...p, profiles }))
+    if (!project) return;
+    useProjectStore.getState().update((p) => ({ ...p, profiles }));
   }
 
   function addProfile() {
@@ -48,39 +48,39 @@ export default function ProfilesPage() {
       role: "",
       voice: "",
       description: "",
-    }
-    const newProfiles = [...(project?.profiles ?? []), newProfile]
-    updateProfiles(newProfiles)
-    setSelectedProfile(newProfile)
+    };
+    const newProfiles = [...(project?.profiles ?? []), newProfile];
+    updateProfiles(newProfiles);
+    setSelectedProfile(newProfile);
   }
 
   function deleteProfile(profileId: string) {
-    if (!project) return
-    const newProfiles = project.profiles.filter((p) => p.id !== profileId)
-    updateProfiles(newProfiles)
+    if (!project) return;
+    const newProfiles = project.profiles.filter((p) => p.id !== profileId);
+    updateProfiles(newProfiles);
 
     // If we deleted the selected profile, select another one
     if (selectedProfile?.id === profileId) {
-      setSelectedProfile(newProfiles.length > 0 ? newProfiles[0] : null)
+      setSelectedProfile(newProfiles.length > 0 ? newProfiles[0] : null);
     }
 
     toast({
       title: "프로필 삭제됨",
       description: "캐릭터 프로필이 삭제되었습니다.",
-    })
+    });
   }
 
   function updateSelectedProfile(updates: Partial<Profile>) {
-    if (!project || !selectedProfile) return
+    if (!project || !selectedProfile) return;
 
-    const updatedProfile = { ...selectedProfile, ...updates }
-    const newProfiles = project.profiles.map((p) => (p.id === selectedProfile.id ? updatedProfile : p))
+    const updatedProfile = { ...selectedProfile, ...updates };
+    const newProfiles = project.profiles.map((p) => (p.id === selectedProfile.id ? updatedProfile : p));
 
-    updateProfiles(newProfiles)
-    setSelectedProfile(updatedProfile)
+    updateProfiles(newProfiles);
+    setSelectedProfile(updatedProfile);
   }
 
-  if (!project) return <div>프로젝트를 찾을 수 없습니다.</div>
+  if (!project) return <div>프로젝트를 찾을 수 없습니다.</div>;
 
   return (
     <div className="space-y-6">
@@ -127,8 +127,8 @@ export default function ProfilesPage() {
                       size="icon"
                       className="h-6 w-6 opacity-0 group-hover:opacity-100"
                       onClick={(e) => {
-                        e.stopPropagation()
-                        deleteProfile(profile.id)
+                        e.stopPropagation();
+                        deleteProfile(profile.id);
                       }}
                     >
                       <Trash2 size={12} className="text-red-600" />
@@ -207,5 +207,5 @@ export default function ProfilesPage() {
         </Card>
       </div>
     </div>
-  )
+  );
 }

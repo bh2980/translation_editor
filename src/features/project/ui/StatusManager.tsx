@@ -1,44 +1,44 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import type { TranslationStatus } from "@/features/project/settings/types"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Trash2 } from "lucide-react"
+import { useState } from "react";
+import type { TranslationStatus } from "@/features/project/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Trash2 } from "lucide-react";
 
 const PALETTE = [
   { id: "slate", label: "Slate" },
   { id: "amber", label: "Amber" },
   { id: "emerald", label: "Emerald" },
   { id: "violet", label: "Violet" },
-]
+];
 
 export function StatusManager({
   statuses,
   onChange,
 }: {
-  statuses: TranslationStatus[]
-  onChange: (next: TranslationStatus[]) => void
+  statuses: TranslationStatus[];
+  onChange: (next: TranslationStatus[]) => void;
 }) {
-  const [local, setLocal] = useState<TranslationStatus[]>(statuses)
+  const [local, setLocal] = useState<TranslationStatus[]>(statuses);
 
   function update(idx: number, patch: Partial<TranslationStatus>) {
-    const next = local.slice()
-    next[idx] = { ...next[idx], ...patch }
-    setLocal(next)
-    onChange(next)
+    const next = local.slice();
+    next[idx] = { ...next[idx], ...patch };
+    setLocal(next);
+    onChange(next);
   }
 
   function add() {
-    const next = [...local, { id: crypto.randomUUID(), name: "새 상태", color: "slate", order: local.length }]
-    setLocal(next)
-    onChange(next)
+    const next = [...local, { id: crypto.randomUUID(), name: "새 상태", color: "slate", order: local.length }];
+    setLocal(next);
+    onChange(next);
   }
 
   function remove(id: string) {
-    const next = local.filter((s) => s.id !== id).map((s, i) => ({ ...s, order: i }))
-    setLocal(next)
-    onChange(next)
+    const next = local.filter((s) => s.id !== id).map((s, i) => ({ ...s, order: i }));
+    setLocal(next);
+    onChange(next);
   }
 
   return (
@@ -67,20 +67,20 @@ export function StatusManager({
       ))}
       <Button onClick={add}>상태 추가</Button>
     </div>
-  )
+  );
 }
 
 function colorToClass(color: string) {
   switch (color) {
     case "slate":
-      return "bg-slate-500"
+      return "bg-slate-500";
     case "amber":
-      return "bg-amber-500"
+      return "bg-amber-500";
     case "emerald":
-      return "bg-emerald-500"
+      return "bg-emerald-500";
     case "violet":
-      return "bg-violet-500"
+      return "bg-violet-500";
     default:
-      return "bg-slate-500"
+      return "bg-slate-500";
   }
 }

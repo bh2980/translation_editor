@@ -1,30 +1,30 @@
-"use client"
+"use client";
 
-import { useEffect, useMemo, useState } from "react"
-import { useParams } from "react-router-dom"
-import type { GlossaryTerm } from "@/features/project/glossary/types"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Plus, UploadCloud, Trash2, Download } from "lucide-react"
-import { ColGroup, ResizableHeaderCell, useResizableColumns } from "@/components/ui/resizable-columns"
-import { GlossaryImportDialog } from "@/features/project/glossary/ui/GlossaryImportDialog"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { exportObjectsToCsv } from "@/lib/csv"
-import { Checkbox } from "@/components/ui/checkbox"
-import { useToast } from "@/hooks/use-toast"
-import { useProjectStore } from "@/stores/project-store"
+import { useEffect, useMemo, useState } from "react";
+import { useParams } from "react-router-dom";
+import type { GlossaryTerm } from "@/features/glossary/types";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Plus, UploadCloud, Trash2, Download } from "lucide-react";
+import { ColGroup, ResizableHeaderCell, useResizableColumns } from "@/components/ui/resizable-columns";
+import { GlossaryImportDialog } from "@/features/glossary/ui/GlossaryImportDialog";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { exportObjectsToCsv } from "@/lib/csv";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useToast } from "@/hooks/use-toast";
+import { useProjectStore } from "@/stores/project-store";
 
 export default function GlossaryPage() {
-  const params = useParams<{ id: string }>()
-  const project = useProjectStore((s) => s.project)
-  const load = useProjectStore((s) => s.load)
-  const [query, setQuery] = useState("")
-  const [importOpen, setImportOpen] = useState(false)
-  const [exportDelim, setExportDelim] = useState<string>(",")
-  const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({})
-  const { toast } = useToast()
+  const params = useParams<{ id: string }>();
+  const project = useProjectStore((s) => s.project);
+  const load = useProjectStore((s) => s.load);
+  const [query, setQuery] = useState("");
+  const [importOpen, setImportOpen] = useState(false);
+  const [exportDelim, setExportDelim] = useState<string>(",");
+  const [selectedRows, setSelectedRows] = useState<Record<string, boolean>>({});
+  const { toast } = useToast();
 
   const { widths, onMouseDown } = useResizableColumns(
     [
@@ -34,8 +34,8 @@ export default function GlossaryPage() {
       { id: "notes", initialWidth: 400, minWidth: 240 },
       { id: "del", initialWidth: 80, minWidth: 60 },
     ],
-    `glossary:${params?.id}`,
-  )
+    `glossary:${params?.id}`
+  );
 
   const filtered = useMemo(
     () =>
@@ -43,46 +43,46 @@ export default function GlossaryPage() {
         (t) =>
           t.source.toLowerCase().includes(query.toLowerCase()) ||
           t.target.toLowerCase().includes(query.toLowerCase()) ||
-          (t.notes ?? "").toLowerCase().includes(query.toLowerCase()),
+          (t.notes ?? "").toLowerCase().includes(query.toLowerCase())
       ),
-    [project?.glossary, query],
-  )
+    [project?.glossary, query]
+  );
 
-  const selectedCount = useMemo(() => Object.values(selectedRows).filter(Boolean).length, [selectedRows])
+  const selectedCount = useMemo(() => Object.values(selectedRows).filter(Boolean).length, [selectedRows]);
 
   const allSelected = useMemo(() => {
-    if (filtered.length === 0) return false
-    return filtered.every((term) => selectedRows[term.id])
-  }, [filtered, selectedRows])
+    if (filtered.length === 0) return false;
+    return filtered.every((term) => selectedRows[term.id]);
+  }, [filtered, selectedRows]);
 
   const someSelected = useMemo(() => {
-    return filtered.some((term) => selectedRows[term.id])
-  }, [filtered, selectedRows])
+    return filtered.some((term) => selectedRows[term.id]);
+  }, [filtered, selectedRows]);
 
   function update(glossary: GlossaryTerm[]) {
-    if (!project) return
-    useProjectStore.getState().update((p) => ({ ...p, glossary }))
+    if (!project) return;
+    useProjectStore.getState().update((p) => ({ ...p, glossary }));
   }
 
   function onImported(terms: GlossaryTerm[]) {
-    update([...(project?.glossary ?? []), ...terms])
+    update([...(project?.glossary ?? []), ...terms]);
     toast({
       title: "용어집 가져오기 완료",
       description: `${terms.length}개의 용어가 추가되었습니다.`,
-    })
+    });
   }
 
   function toggleSelectAll() {
     if (allSelected) {
       // Deselect all
-      setSelectedRows({})
+      setSelectedRows({});
     } else {
       // Select all filtered items
-      const newSelection: Record<string, boolean> = {}
+      const newSelection: Record<string, boolean> = {};
       filtered.forEach((term) => {
-        newSelection[term.id] = true
-      })
-      setSelectedRows(newSelection)
+        newSelection[term.id] = true;
+      });
+      setSelectedRows(newSelection);
     }
   }
 
@@ -90,38 +90,38 @@ export default function GlossaryPage() {
     setSelectedRows((prev) => ({
       ...prev,
       [termId]: !prev[termId],
-    }))
+    }));
   }
 
   function deleteSelected() {
-    if (!project || selectedCount === 0) return
+    if (!project || selectedCount === 0) return;
 
-    const selectedIds = new Set(Object.keys(selectedRows).filter((id) => selectedRows[id]))
-    const newGlossary = project.glossary.filter((term) => !selectedIds.has(term.id))
+    const selectedIds = new Set(Object.keys(selectedRows).filter((id) => selectedRows[id]));
+    const newGlossary = project.glossary.filter((term) => !selectedIds.has(term.id));
 
-    update(newGlossary)
-    setSelectedRows({})
+    update(newGlossary);
+    setSelectedRows({});
 
     toast({
       title: "선택된 용어 삭제 완료",
       description: `${selectedCount}개의 용어가 삭제되었습니다.`,
-    })
+    });
   }
 
   useEffect(() => {
-    if (!params?.id) return
-    load(params.id)
-  }, [params?.id, load])
+    if (!params?.id) return;
+    load(params.id);
+  }, [params?.id, load]);
 
-  if (!project) return <div>프로젝트를 찾을 수 없습니다.</div>
+  if (!project) return <div>프로젝트를 찾을 수 없습니다.</div>;
 
   function exportCSV() {
     const cols = [
       { key: "source", header: "source" },
       { key: "target", header: "target" },
       { key: "notes", header: "notes" },
-    ]
-    exportObjectsToCsv(`${project.name}_glossary.csv`, project.glossary ?? [], exportDelim, cols)
+    ];
+    exportObjectsToCsv(`${project?.name}_glossary.csv`, project?.glossary ?? [], exportDelim, cols);
   }
 
   return (
@@ -277,5 +277,5 @@ export default function GlossaryPage() {
 
       <GlossaryImportDialog open={importOpen} onOpenChange={setImportOpen} onImported={onImported} />
     </div>
-  )
+  );
 }

@@ -1,11 +1,11 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useMemo } from "react"
-import { useParams } from "react-router-dom"
-import type { DashboardWidget } from "@/features/project/dashboard/types"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Settings, TrendingUp, FileText, BookOpen, Zap } from "lucide-react"
+import { useEffect, useMemo } from "react";
+import { useParams } from "react-router-dom";
+import type { DashboardWidget } from "@/features/project/types";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Settings, TrendingUp, FileText, BookOpen, Zap } from "lucide-react";
 import {
   PieChart,
   Pie,
@@ -17,121 +17,121 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
-} from "recharts"
-import { Switch } from "@/components/ui/switch"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { useProjectStore } from "@/stores/project-store"
+} from "recharts";
+import { Switch } from "@/components/ui/switch";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { useProjectStore } from "@/stores/project-store";
 
 const COLORS = {
   slate: "#64748b",
   amber: "#f59e0b",
   emerald: "#10b981",
   violet: "#8b5cf6",
-}
+};
 
 const DEFAULT_WIDGETS: DashboardWidget[] = [
   { id: "translation-progress", type: "translation-progress", title: "번역 진행률", enabled: true, position: 0 },
   { id: "api-usage", type: "api-usage", title: "API 사용량", enabled: true, position: 1 },
   { id: "recent-activity", type: "recent-activity", title: "최근 활동", enabled: true, position: 2 },
   { id: "glossary-stats", type: "glossary-stats", title: "용어집 통계", enabled: true, position: 3 },
-]
+];
 
 export default function DashboardPage() {
-  const params = useParams<{ id: string }>()
-  const project = useProjectStore((s) => s.project)
-  const load = useProjectStore((s) => s.load)
+  const params = useParams<{ id: string }>();
+  const project = useProjectStore((s) => s.project);
+  const load = useProjectStore((s) => s.load);
 
   useEffect(() => {
-    if (!params?.id) return
-    load(params.id)
-  }, [params?.id, load])
+    if (!params?.id) return;
+    load(params.id);
+  }, [params?.id, load]);
 
   const widgets = useMemo(() => {
     return (project?.dashboardWidgets || DEFAULT_WIDGETS)
       .filter((w) => w.enabled)
-      .sort((a, b) => a.position - b.position)
-  }, [project?.dashboardWidgets])
+      .sort((a, b) => a.position - b.position);
+  }, [project?.dashboardWidgets]);
 
   const translationStats = useMemo(() => {
-    if (!project) return []
-    const statusCounts = new Map<string, number>()
+    if (!project) return [];
+    const statusCounts = new Map<string, number>();
 
     project.entries.forEach((entry) => {
-      const status = project.statuses.find((s) => s.id === entry.statusId)
+      const status = project.statuses.find((s) => s.id === entry.statusId);
       if (status) {
-        statusCounts.set(status.name, (statusCounts.get(status.name) || 0) + 1)
+        statusCounts.set(status.name, (statusCounts.get(status.name) || 0) + 1);
       }
-    })
+    });
 
     return project.statuses.map((status) => ({
       name: status.name,
       value: statusCounts.get(status.name) || 0,
       color: COLORS[status.color as keyof typeof COLORS] || COLORS.slate,
-    }))
-  }, [project])
+    }));
+  }, [project]);
 
   const apiUsageStats = useMemo(() => {
-    if (!project?.apiUsage) return []
+    if (!project?.apiUsage) return [];
 
     // Group by day for the last 7 days
-    const now = new Date()
-    const days = []
+    const now = new Date();
+    const days = [];
     for (let i = 6; i >= 0; i--) {
-      const date = new Date(now)
-      date.setDate(date.getDate() - i)
+      const date = new Date(now);
+      date.setDate(date.getDate() - i);
       days.push({
         date: date.toISOString().split("T")[0],
         tokens: 0,
         requests: 0,
-      })
+      });
     }
 
     project.apiUsage.forEach((usage) => {
-      const usageDate = new Date(usage.timestamp).toISOString().split("T")[0]
-      const dayData = days.find((d) => d.date === usageDate)
+      const usageDate = new Date(usage.timestamp).toISOString().split("T")[0];
+      const dayData = days.find((d) => d.date === usageDate);
       if (dayData) {
-        dayData.tokens += usage.inputTokens + usage.outputTokens
-        dayData.requests += 1
+        dayData.tokens += usage.inputTokens + usage.outputTokens;
+        dayData.requests += 1;
       }
-    })
+    });
 
     return days.map((day) => ({
       ...day,
       date: new Date(day.date).toLocaleDateString("ko-KR", { month: "short", day: "numeric" }),
-    }))
-  }, [project?.apiUsage])
+    }));
+  }, [project?.apiUsage]);
 
   const totalTokens = useMemo(() => {
-    return project?.apiUsage?.reduce((sum, usage) => sum + usage.inputTokens + usage.outputTokens, 0) || 0
-  }, [project?.apiUsage])
+    return project?.apiUsage?.reduce((sum, usage) => sum + usage.inputTokens + usage.outputTokens, 0) || 0;
+  }, [project?.apiUsage]);
 
   const totalRequests = useMemo(() => {
-    return project?.apiUsage?.length || 0
-  }, [project?.apiUsage])
+    return project?.apiUsage?.length || 0;
+  }, [project?.apiUsage]);
 
   function toggleWidget(widgetId: string) {
-    if (!project) return
+    if (!project) return;
     useProjectStore.getState().update((p) => ({
       ...p,
       dashboardWidgets: (p.dashboardWidgets || DEFAULT_WIDGETS).map((w) =>
-        w.id === widgetId ? { ...w, enabled: !w.enabled } : w,
+        w.id === widgetId ? { ...w, enabled: !w.enabled } : w
       ),
-    }))
+    }));
   }
 
-  if (!project) return <div>프로젝트를 찾을 수 없습니다.</div>
+  if (!project) return <div>프로젝트를 찾을 수 없습니다.</div>;
 
   const completionRate =
     project.entries.length > 0
       ? Math.round(
           (project.entries.filter((e) => {
-            const status = project.statuses.find((s) => s.id === e.statusId)
-            return status?.name === "번역 완료" || status?.name === "검수 완료"
+            const status = project.statuses.find((s) => s.id === e.statusId);
+            return status?.name === "번역 완료" || status?.name === "검수 완료";
           }).length /
             project.entries.length) *
-            100,
+            100
         )
-      : 0
+      : 0;
 
   return (
     <div className="space-y-6">
@@ -173,8 +173,8 @@ export default function DashboardPage() {
             <p className="text-xs text-muted-foreground">
               {
                 project.entries.filter((e) => {
-                  const status = project.statuses.find((s) => s.id === e.statusId)
-                  return status?.name === "번역 완료" || status?.name === "검수 완료"
+                  const status = project.statuses.find((s) => s.id === e.statusId);
+                  return status?.name === "번역 완료" || status?.name === "검수 완료";
                 }).length
               }{" "}
               / {project.entries.length} 완료
@@ -251,7 +251,7 @@ export default function DashboardPage() {
                     </div>
                   </CardContent>
                 </Card>
-              )
+              );
 
             case "api-usage":
               return (
@@ -275,7 +275,7 @@ export default function DashboardPage() {
                     </div>
                   </CardContent>
                 </Card>
-              )
+              );
 
             case "recent-activity":
               return (
@@ -305,7 +305,7 @@ export default function DashboardPage() {
                     </div>
                   </CardContent>
                 </Card>
-              )
+              );
 
             case "glossary-stats":
               return (
@@ -337,7 +337,7 @@ export default function DashboardPage() {
                         <span className="text-sm font-medium text-emerald-600">
                           {
                             project.glossary.filter(
-                              (g) => g.source && g.target && g.source.trim().length > 0 && g.target.trim().length > 0,
+                              (g) => g.source && g.target && g.source.trim().length > 0 && g.target.trim().length > 0
                             ).length
                           }
                         </span>
@@ -345,13 +345,13 @@ export default function DashboardPage() {
                     </div>
                   </CardContent>
                 </Card>
-              )
+              );
 
             default:
-              return null
+              return null;
           }
         })}
       </div>
     </div>
-  )
+  );
 }

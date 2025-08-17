@@ -1,22 +1,22 @@
-"use client"
-import type { Column } from "@tanstack/react-table"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { FilterIcon as Funnel, X } from "lucide-react"
-import type { TranslationEntry } from "@/features/project/translate/types"
-import type { TranslationStatus } from "@/features/project/settings/types"
+"use client";
+import type { Column } from "@tanstack/react-table";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { FilterIcon as Funnel, X } from "lucide-react";
+import type { TranslationEntry } from "@/features/translate/types";
+import { TranslationStatus } from "@/features/project/types";
 
 export function TextColumnFilter({
   column,
   placeholder,
 }: {
-  column: Column<TranslationEntry, unknown>
-  placeholder?: string
+  column: Column<TranslationEntry, unknown>;
+  placeholder?: string;
 }) {
-  const value = (column.getFilterValue() as string) ?? ""
-  const active = value?.length > 0
+  const value = (column.getFilterValue() as string) ?? "";
+  const active = value?.length > 0;
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -45,18 +45,18 @@ export function TextColumnFilter({
         </div>
       </PopoverContent>
     </Popover>
-  )
+  );
 }
 
 export function StatusColumnFilter({
   column,
   statuses,
 }: {
-  column: Column<TranslationEntry, unknown>
-  statuses: TranslationStatus[]
+  column: Column<TranslationEntry, unknown>;
+  statuses: TranslationStatus[];
 }) {
-  const value = (column.getFilterValue() as string) ?? ""
-  const active = value?.length > 0
+  const value = (column.getFilterValue() as string) ?? "";
+  const active = value?.length > 0;
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -92,5 +92,5 @@ export function StatusColumnFilter({
         </div>
       </PopoverContent>
     </Popover>
-  )
+  );
 }

@@ -1,12 +1,11 @@
-"use client"
+"use client";
 
-import type { Project } from "@/features/project/types"
-import type { TranslationEntry } from "@/features/project/translate/types"
-import type { TranslationStatus } from "@/features/project/settings/types"
-import type { AIProvider } from "@/features/project/ai-agent/types"
-import type { GlossaryTerm } from "@/features/project/glossary/types"
+import type { Project, TranslationStatus } from "@/features/project/types";
+import type { TranslationEntry } from "@/features/translate/types";
+import type { GlossaryTerm } from "@/features/glossary/types";
+import { AIProvider } from "@/features/ai/types";
 
-const LS_KEY = "game-translate-projects"
+const LS_KEY = "game-translate-projects";
 
 // Default glossary terms to populate new projects
 const DEFAULT_GLOSSARY_TERMS: Omit<GlossaryTerm, "id">[] = [
@@ -120,62 +119,62 @@ const DEFAULT_GLOSSARY_TERMS: Omit<GlossaryTerm, "id">[] = [
   { source: "Complete", target: "완료", notes: "끝남" },
   { source: "Failed", target: "실패", notes: "실패함" },
   { source: "Success", target: "성공", notes: "성공함" },
-]
+];
 
 export function loadAllProjects(): Project[] {
-  if (typeof window === "undefined") return []
+  if (typeof window === "undefined") return [];
   try {
-    const raw = localStorage.getItem(LS_KEY)
-    return raw ? (JSON.parse(raw) as Project[]) : []
+    const raw = localStorage.getItem(LS_KEY);
+    return raw ? (JSON.parse(raw) as Project[]) : [];
   } catch {
-    return []
+    return [];
   }
 }
 
 export function loadProject(id: string): Project {
-  return loadAllProjects().find((p) => p.id === id) as Project
+  return loadAllProjects().find((p) => p.id === id) as Project;
 }
 
 export function saveProject(project: Project) {
-  const all = loadAllProjects()
-  const idx = all.findIndex((p) => p.id === project.id)
+  const all = loadAllProjects();
+  const idx = all.findIndex((p) => p.id === project.id);
   if (idx >= 0) {
-    all[idx] = project
+    all[idx] = project;
   } else {
-    all.push(project)
+    all.push(project);
   }
-  localStorage.setItem(LS_KEY, JSON.stringify(all))
+  localStorage.setItem(LS_KEY, JSON.stringify(all));
 }
 
 export function deleteProject(id: string) {
-  const next = loadAllProjects().filter((p) => p.id !== id)
-  localStorage.setItem(LS_KEY, JSON.stringify(next))
+  const next = loadAllProjects().filter((p) => p.id !== id);
+  localStorage.setItem(LS_KEY, JSON.stringify(next));
 }
 
 export async function importProjectFromFile(file: File): Promise<Project | null> {
-  const text = await file.text()
-  const proj = JSON.parse(text) as Project
-  saveProject(proj)
-  return proj
+  const text = await file.text();
+  const proj = JSON.parse(text) as Project;
+  saveProject(proj);
+  return proj;
 }
 
 export function exportProjectToFile(project: Project) {
-  const blob = new Blob([JSON.stringify(project, null, 2)], { type: "application/json" })
-  const url = URL.createObjectURL(blob)
-  const a = document.createElement("a")
-  a.href = url
-  a.download = `${project.name.replace(/\s+/g, "_")}_${project.id}.json`
-  document.body.appendChild(a)
-  a.click()
-  a.remove()
-  URL.revokeObjectURL(url)
+  const blob = new Blob([JSON.stringify(project, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${project.name.replace(/\s+/g, "_")}_${project.id}.json`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
 }
 
 function createDefaultGlossary(): GlossaryTerm[] {
   return DEFAULT_GLOSSARY_TERMS.map((term) => ({
     ...term,
     id: crypto.randomUUID(),
-  }))
+  }));
 }
 
 export function createEmptyProject({
@@ -186,29 +185,29 @@ export function createEmptyProject({
   rows,
   mapping,
 }: {
-  id: string
-  name: string
-  sourceLang: string
-  targetLang: string
-  rows: Record<string, any>[]
-  mapping: { key: string; source: string; target?: string; status?: string }
+  id: string;
+  name: string;
+  sourceLang: string;
+  targetLang: string;
+  rows: Record<string, any>[];
+  mapping: { key: string; source: string; target?: string; status?: string };
 }) {
   const statuses: TranslationStatus[] = [
     { id: crypto.randomUUID(), name: "미번역", color: "slate", order: 0 },
     { id: crypto.randomUUID(), name: "초벌 번역", color: "amber", order: 1 },
     { id: crypto.randomUUID(), name: "번역 완료", color: "emerald", order: 2 },
     { id: crypto.randomUUID(), name: "검수 완료", color: "violet", order: 3 },
-  ]
-  const statusByName = new Map(statuses.map((s) => [s.name, s.id]))
-  const defaultStatusId = statusByName.get("미번역")!
+  ];
+  const statusByName = new Map(statuses.map((s) => [s.name, s.id]));
+  const defaultStatusId = statusByName.get("미번역")!;
 
   const entries: TranslationEntry[] = rows.map((r, i) => {
-    const key = String(r[mapping.key] ?? "")
-    const source = String(r[mapping.source] ?? "")
-    const target = mapping.target ? String(r[mapping.target] ?? "") : ""
-    const rawStatus = mapping.status ? String(r[mapping.status] ?? "") : ""
+    const key = String(r[mapping.key] ?? "");
+    const source = String(r[mapping.source] ?? "");
+    const target = mapping.target ? String(r[mapping.target] ?? "") : "";
+    const rawStatus = mapping.status ? String(r[mapping.status] ?? "") : "";
     const statusId =
-      rawStatus && statusByName.has(rawStatus) ? (statusByName.get(rawStatus) as string) : defaultStatusId
+      rawStatus && statusByName.has(rawStatus) ? (statusByName.get(rawStatus) as string) : defaultStatusId;
     return {
       id: crypto.randomUUID(),
       key,
@@ -217,10 +216,10 @@ export function createEmptyProject({
       statusId,
       notes: "",
       meta: { rowIndex: i },
-    }
-  })
+    };
+  });
 
-  const now = Date.now()
+  const now = Date.now();
   const project: Project = {
     id,
     name,
@@ -242,8 +241,8 @@ export function createEmptyProject({
         "Return only the translated text.",
     },
     columnMapping: mapping,
-  }
-  return project
+  };
+  return project;
 }
 
 export function createBlankProject({
@@ -252,18 +251,18 @@ export function createBlankProject({
   sourceLang,
   targetLang,
 }: {
-  id: string
-  name: string
-  sourceLang: string
-  targetLang: string
+  id: string;
+  name: string;
+  sourceLang: string;
+  targetLang: string;
 }) {
   const statuses: TranslationStatus[] = [
     { id: crypto.randomUUID(), name: "미번역", color: "slate", order: 0 },
     { id: crypto.randomUUID(), name: "초벌 번역", color: "amber", order: 1 },
     { id: crypto.randomUUID(), name: "번역 완료", color: "emerald", order: 2 },
     { id: crypto.randomUUID(), name: "검수 완료", color: "violet", order: 3 },
-  ]
-  const now = Date.now()
+  ];
+  const now = Date.now();
   const project: Project = {
     id,
     name,
@@ -285,7 +284,6 @@ export function createBlankProject({
         "Return only the translated text.",
     },
     columnMapping: undefined,
-  }
-  return project
+  };
+  return project;
 }
-

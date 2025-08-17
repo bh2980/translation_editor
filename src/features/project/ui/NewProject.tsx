@@ -1,23 +1,14 @@
-import type React from "react";
-
-import { useMemo, useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { DevTool } from "@hookform/devtools";
-import { Link, useNavigate } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ChevronLeft, Upload, X } from "lucide-react";
-import { FileMappingDialog } from "@/features/project/new-project/ui/FileMappingDialog";
-import { parseSpreadsheet } from "@/features/project/new-project/lib/parse-spreadsheet";
-import type { Project } from "@/features/project/types";
-import type { ParsedRow } from "@/types/common";
-import { v4 as uuidv4 } from "@/lib/uuid";
-import { Spinner } from "@/components/ui/spinner";
-import { useProjectStore } from "@/stores/project-store";
-import { createBlankProject, createEmptyProject, saveProject } from "@/lib/storage";
+import { useState } from "react";
+import { Project } from "../types";
 
 const LANGS = [
   { code: "ko", label: "Korean (ko)" },
@@ -30,14 +21,8 @@ const LANGS = [
   { code: "es", label: "Spanish (es)" },
 ];
 
-type FormValues = {
-  name: string;
-  sourceLang: string;
-  targetLang: string;
-};
-
 export default function NewProjectPage() {
-  const { control, register, handleSubmit, getValues } = useForm<FormValues>({
+  const { control, register } = useForm<Project>({
     defaultValues: {
       name: "새 프로젝트",
       sourceLang: "ko",
@@ -45,85 +30,7 @@ export default function NewProjectPage() {
     },
     mode: "onChange",
   });
-  const [file, setFile] = useState<File | null>(null);
-  const [rows, setRows] = useState<ParsedRow[]>([]);
-  const [columns, setColumns] = useState<string[]>([]);
-  const [mappingOpen, setMappingOpen] = useState(false);
-  const [isParsing, setIsParsing] = useState(false);
-  const [delimiter, setDelimiter] = useState<string>("auto");
-  const navigate = useNavigate();
-  const setProjectGlobal = useProjectStore((s) => s.set);
-
-  const isCsv = useMemo(() => {
-    const nameLower = (file?.name || "").toLowerCase();
-    return nameLower.endsWith(".csv") || file?.type === "text/csv";
-  }, [file]);
-
-  async function doParse(f: File, delim: string) {
-    setIsParsing(true);
-    try {
-      const { rows, columns } = await parseSpreadsheet(f, { delimiter: delim as any });
-      setRows(rows);
-      setColumns(columns);
-    } finally {
-      setIsParsing(false);
-    }
-  }
-
-  async function onFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    if (!f) return;
-    setFile(f);
-    e.target.value = "";
-    await doParse(f, delimiter);
-    setMappingOpen(true);
-  }
-
-  async function onCreateBlank() {
-    const { name, sourceLang, targetLang } = getValues();
-    const id = uuidv4();
-    const project: Project = createBlankProject({
-      id,
-      name,
-      sourceLang,
-      targetLang,
-    });
-    saveProject(project);
-    setProjectGlobal(project);
-    navigate(`/project/${id}/translate`);
-  }
-
-  async function onDelimiterChange(d: string) {
-    setDelimiter(d);
-    if (file) {
-      await doParse(file, d);
-    }
-  }
-
-  function clearFile() {
-    setFile(null);
-  }
-
-  async function onMappingComplete(mapping: { key: string; source: string; target?: string; status?: string }) {
-    if (!rows.length) return;
-    const { name, sourceLang, targetLang } = getValues();
-    const id = uuidv4();
-    const project: Project = createEmptyProject({
-      id,
-      name,
-      sourceLang,
-      targetLang,
-      rows,
-      mapping,
-    });
-    saveProject(project);
-    setProjectGlobal(project);
-    navigate(`/project/${id}/translate`);
-  }
-
-  function onSubmit() {
-    return onCreateBlank();
-  }
+  const [file, setFile] = useState<File | null>();
 
   return (
     <main className="mx-auto max-w-3xl px-6 py-10">
@@ -140,7 +47,7 @@ export default function NewProjectPage() {
           <CardDescription>프로젝트 정보를 설정하고 CSV 파일을 불러옵니다.</CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
-          <form onSubmit={handleSubmit(onSubmit)} className="grid gap-6 sm:grid-cols-2">
+          <form className="grid gap-6 sm:grid-cols-2">
             <div className="space-y-2 col-span-2">
               <Label htmlFor="name">프로젝트 이름</Label>
               <Input id="name" {...register("name", { required: true })} />
@@ -195,10 +102,7 @@ export default function NewProjectPage() {
                     {file ? (
                       <div className="text-sm flex gap-1 items-center">
                         선택된 파일: {file.name}
-                        <button
-                          className="text-red-500 hover:bg-red-100 p-1 rounded-sm cursor-pointer"
-                          onClick={clearFile}
-                        >
+                        <button className="text-red-500 hover:bg-red-100 p-1 rounded-sm cursor-pointer">
                           <X size={12} />
                         </button>
                       </div>
@@ -207,58 +111,27 @@ export default function NewProjectPage() {
                     )}
                     <div className="text-xs text-muted-foreground">CSV 또는 XLSX 형식 지원</div>
                   </div>
-                  <div className={isParsing ? "pointer-events-none opacity-60" : ""}>
+                  <div>
                     <label htmlFor="upload" className="inline-flex">
-                      <Button className="gap-2" asChild disabled={isParsing}>
+                      <Button className="gap-2" asChild>
                         <span>
                           <Upload size={16} />
                           파일 선택
                         </span>
                       </Button>
                     </label>
-                    <input
-                      id="upload"
-                      type="file"
-                      accept=".csv, .xlsx, .xls"
-                      className="hidden"
-                      onChange={onFileSelected}
-                      disabled={isParsing}
-                    />
+                    <input id="upload" type="file" accept=".csv, .xlsx, .xls" className="hidden" />
                   </div>
                 </div>
-
-                {isParsing && (
-                  <div className="absolute inset-0 z-10 flex items-center justify-center rounded-md bg-background/70 backdrop-blur-sm">
-                    <div className="flex items-center gap-2 rounded-md border bg-background px-3 py-2 text-sm">
-                      <Spinner />
-                      <span>파일 분석 중…</span>
-                    </div>
-                  </div>
-                )}
               </div>
             </div>
-
-            <div className="col-span-2 flex justify-end">
-              <Button type="submit">생성하기</Button>
-            </div>
           </form>
-
           {import.meta.env.DEV && <DevTool control={control} />}
         </CardContent>
-        <CardFooter className="justify-end"></CardFooter>
+        <CardFooter className="justify-end">
+          <Button type="submit">생성하기</Button>
+        </CardFooter>
       </Card>
-
-      <FileMappingDialog
-        open={mappingOpen}
-        onOpenChange={setMappingOpen}
-        columns={columns}
-        sampleRows={rows.slice(0, 5)}
-        onComplete={onMappingComplete}
-        isCsv={isCsv}
-        delimiter={delimiter}
-        onDelimiterChange={onDelimiterChange}
-        busy={isParsing}
-      />
     </main>
   );
 }

@@ -1,14 +1,14 @@
-"use client"
+"use client";
 
-import { useEffect, useMemo, useState } from "react"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
-import type { Project } from "@/features/project/types"
-import type { GlossaryTerm } from "@/features/project/glossary/types"
-import type { TranslationEntry } from "@/features/project/translate/types"
-import { TokenizedText, extractTokens, findMissingTokens } from "@/lib/tokenize"
-import { Wand2, Save } from "lucide-react"
+import { useEffect, useMemo, useState } from "react";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import type { Project } from "@/features/project/types";
+import type { GlossaryTerm } from "@/features/glossary/types";
+import type { TranslationEntry } from "@/features/translate/types";
+import { TokenizedText, extractTokens, findMissingTokens } from "@/lib/tokenize";
+import { Wand2, Save } from "lucide-react";
 
 export function EditorDrawer({
   open,
@@ -18,23 +18,23 @@ export function EditorDrawer({
   glossary,
   project,
 }: {
-  open: boolean
-  onOpenChange: (o: boolean) => void
-  entry: TranslationEntry | null
-  onSave: (entry: TranslationEntry) => void
-  glossary: GlossaryTerm[]
-  project: Project
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  entry: TranslationEntry | null;
+  onSave: (entry: TranslationEntry) => void;
+  glossary: GlossaryTerm[];
+  project: Project;
 }) {
-  const [value, setValue] = useState(entry?.target ?? "")
-  useEffect(() => setValue(entry?.target ?? ""), [entry?.target])
+  const [value, setValue] = useState(entry?.target ?? "");
+  useEffect(() => setValue(entry?.target ?? ""), [entry?.target]);
 
-  const sourceTokens = useMemo(() => extractTokens(entry?.source ?? ""), [entry?.source])
-  const targetTokens = useMemo(() => extractTokens(value ?? ""), [value])
-  const missing = useMemo(() => findMissingTokens(sourceTokens, targetTokens), [sourceTokens, targetTokens])
+  const sourceTokens = useMemo(() => extractTokens(entry?.source ?? ""), [entry?.source]);
+  const targetTokens = useMemo(() => extractTokens(value ?? ""), [value]);
+  const missing = useMemo(() => findMissingTokens(sourceTokens, targetTokens), [sourceTokens, targetTokens]);
 
   async function aiTranslateSelection() {
-    if (!entry) return
-    const selection = window.getSelection()?.toString() || entry.source
+    if (!entry) return;
+    const selection = window.getSelection()?.toString() || entry.source;
     const res = await fetch("/api/translate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -48,10 +48,10 @@ export function EditorDrawer({
         targetLang: project.targetLang,
         glossary,
       }),
-    })
+    });
     if (res.ok) {
-      const data = await res.json()
-      setValue((prev) => (selection === entry.source ? data.text : prev.replace(selection, data.text)))
+      const data = await res.json();
+      setValue((prev) => (selection === entry.source ? data.text : prev.replace(selection, data.text)));
     }
   }
 
@@ -122,5 +122,5 @@ export function EditorDrawer({
         </div>
       </SheetContent>
     </Sheet>
-  )
+  );
 }

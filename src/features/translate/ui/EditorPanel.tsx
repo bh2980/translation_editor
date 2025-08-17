@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useEffect, useMemo, useState } from "react"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
-import { Textarea } from "@/components/ui/textarea"
-import { Button } from "@/components/ui/button"
-import type { Project } from "@/features/project/types"
-import type { GlossaryTerm } from "@/features/project/glossary/types"
-import type { TranslationEntry } from "@/features/project/translate/types"
-import { TokenizedText, extractTokens, findMissingTokens } from "@/lib/tokenize"
-import { Wand2, Save } from "lucide-react"
+import { useEffect, useMemo, useState } from "react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
+import type { Project } from "@/features/project/types";
+import type { GlossaryTerm } from "@/features/glossary/types";
+import type { TranslationEntry } from "@/features/translate/types";
+import { TokenizedText, extractTokens, findMissingTokens } from "@/lib/tokenize";
+import { Wand2, Save } from "lucide-react";
 
-export type EditorMode = "popover" | "drawer-left" | "split"
+export type EditorMode = "popover" | "drawer-left" | "split";
 
 export function EditorContent({
   entry,
@@ -23,19 +23,19 @@ export function EditorContent({
   project,
   onSave,
 }: {
-  entry: TranslationEntry
-  value: string
-  setValue: (v: string) => void
-  glossary: GlossaryTerm[]
-  project: Project
-  onSave: (entry: TranslationEntry) => void
+  entry: TranslationEntry;
+  value: string;
+  setValue: (v: string) => void;
+  glossary: GlossaryTerm[];
+  project: Project;
+  onSave: (entry: TranslationEntry) => void;
 }) {
-  const sourceTokens = useMemo(() => extractTokens(entry?.source ?? ""), [entry?.source])
-  const targetTokens = useMemo(() => extractTokens(value ?? ""), [value])
-  const missing = useMemo(() => findMissingTokens(sourceTokens, targetTokens), [sourceTokens, targetTokens])
+  const sourceTokens = useMemo(() => extractTokens(entry?.source ?? ""), [entry?.source]);
+  const targetTokens = useMemo(() => extractTokens(value ?? ""), [value]);
+  const missing = useMemo(() => findMissingTokens(sourceTokens, targetTokens), [sourceTokens, targetTokens]);
 
   async function aiTranslateSelection() {
-    const selection = window.getSelection()?.toString() || entry.source
+    const selection = window.getSelection()?.toString() || entry.source;
     const res = await fetch("/api/translate", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -49,10 +49,10 @@ export function EditorContent({
         targetLang: project.targetLang,
         glossary,
       }),
-    })
+    });
     if (res.ok) {
-      const data = await res.json()
-      setValue((prev) => (selection === entry.source ? data.text : prev.replace(selection, data.text)))
+      const data = await res.json();
+      setValue((prev) => (selection === entry.source ? data.text : prev.replace(selection, data.text)));
     }
   }
 
@@ -115,7 +115,7 @@ export function EditorContent({
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export function EditorDrawerLeft({
@@ -126,16 +126,16 @@ export function EditorDrawerLeft({
   glossary,
   project,
 }: {
-  open: boolean
-  onOpenChange: (o: boolean) => void
-  entry: TranslationEntry | null
-  onSave: (entry: TranslationEntry) => void
-  glossary: GlossaryTerm[]
-  project: Project
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  entry: TranslationEntry | null;
+  onSave: (entry: TranslationEntry) => void;
+  glossary: GlossaryTerm[];
+  project: Project;
 }) {
-  const [value, setValue] = useState(entry?.target ?? "")
-  useEffect(() => setValue(entry?.target ?? ""), [entry?.target])
-  if (!entry) return null
+  const [value, setValue] = useState(entry?.target ?? "");
+  useEffect(() => setValue(entry?.target ?? ""), [entry?.target]);
+  if (!entry) return null;
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-2xl">
@@ -154,7 +154,7 @@ export function EditorDrawerLeft({
         </div>
       </SheetContent>
     </Sheet>
-  )
+  );
 }
 
 export function EditorSplitView({
@@ -163,19 +163,19 @@ export function EditorSplitView({
   glossary,
   project,
 }: {
-  entry: TranslationEntry | null
-  onSave: (entry: TranslationEntry) => void
-  glossary: GlossaryTerm[]
-  project: Project
+  entry: TranslationEntry | null;
+  onSave: (entry: TranslationEntry) => void;
+  glossary: GlossaryTerm[];
+  project: Project;
 }) {
-  const [value, setValue] = useState(entry?.target ?? "")
-  useEffect(() => setValue(entry?.target ?? ""), [entry?.target])
+  const [value, setValue] = useState(entry?.target ?? "");
+  useEffect(() => setValue(entry?.target ?? ""), [entry?.target]);
   if (!entry) {
     return (
       <div className="flex h-full items-center justify-center text-sm text-muted-foreground">
         왼쪽에서 항목을 선택하세요.
       </div>
-    )
+    );
   }
   return (
     <div className="h-full overflow-auto p-4">
@@ -189,7 +189,7 @@ export function EditorSplitView({
         onSave={onSave}
       />
     </div>
-  )
+  );
 }
 
 export function EditorCellPopover({
@@ -200,16 +200,16 @@ export function EditorCellPopover({
   glossary,
   project,
 }: {
-  children: React.ReactNode
-  entry: TranslationEntry
-  onSave: (entry: TranslationEntry) => void
-  onSaved?: (saved: TranslationEntry) => void
-  glossary: GlossaryTerm[]
-  project: Project
+  children: React.ReactNode;
+  entry: TranslationEntry;
+  onSave: (entry: TranslationEntry) => void;
+  onSaved?: (saved: TranslationEntry) => void;
+  glossary: GlossaryTerm[];
+  project: Project;
 }) {
-  const [open, setOpen] = useState(false)
-  const [value, setValue] = useState(entry?.target ?? "")
-  useEffect(() => setValue(entry?.target ?? ""), [entry?.target])
+  const [open, setOpen] = useState(false);
+  const [value, setValue] = useState(entry?.target ?? "");
+  useEffect(() => setValue(entry?.target ?? ""), [entry?.target]);
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
@@ -222,12 +222,12 @@ export function EditorCellPopover({
           glossary={glossary}
           project={project}
           onSave={(e) => {
-            onSave(e)
-            setOpen(false)
-            onSaved?.(e)
+            onSave(e);
+            setOpen(false);
+            onSaved?.(e);
           }}
         />
       </PopoverContent>
     </Popover>
-  )
+  );
 }

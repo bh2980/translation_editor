@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import Papa from "papaparse"
-import { useRef, useState } from "react"
-import { Button } from "@/components/ui/button"
+import Papa from "papaparse";
+import { useRef, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -10,50 +10,50 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Input } from "@/components/ui/input"
-import type { GlossaryTerm } from "@/features/project/glossary/types"
-import { Spinner } from "@/components/ui/spinner"
+} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import type { GlossaryTerm } from "@/features/glossary/types";
+import { Spinner } from "@/components/ui/spinner";
 
 export function GlossaryImportDialog({
   open,
   onOpenChange,
   onImported,
 }: {
-  open: boolean
-  onOpenChange: (o: boolean) => void
-  onImported: (terms: GlossaryTerm[]) => void
+  open: boolean;
+  onOpenChange: (o: boolean) => void;
+  onImported: (terms: GlossaryTerm[]) => void;
 }) {
-  const [delimiter, setDelimiter] = useState<string>(",")
-  const [custom, setCustom] = useState("")
-  const [busy, setBusy] = useState(false)
-  const fileRef = useRef<HTMLInputElement>(null)
+  const [delimiter, setDelimiter] = useState<string>(",");
+  const [custom, setCustom] = useState("");
+  const [busy, setBusy] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   function resolveDelimiter(val: string) {
-    if (val === "\\t") return "\t"
-    if (val === "custom") return custom || ","
-    return val
+    if (val === "\\t") return "\t";
+    if (val === "custom") return custom || ",";
+    return val;
   }
 
   function parseFile(file: File, delim: string) {
-    setBusy(true)
-    const reader = new FileReader()
+    setBusy(true);
+    const reader = new FileReader();
     reader.onload = () => {
-      const text = String(reader.result ?? "")
-      const result = Papa.parse<string[]>(text, { delimiter: delim, skipEmptyLines: true })
-      const data = result.data as string[][]
-      const terms: GlossaryTerm[] = []
+      const text = String(reader.result ?? "");
+      const result = Papa.parse<string[]>(text, { delimiter: delim, skipEmptyLines: true });
+      const data = result.data as string[][];
+      const terms: GlossaryTerm[] = [];
       for (const row of data) {
-        const [source, target, notes] = row
-        if (!source || !target) continue
-        terms.push({ id: crypto.randomUUID(), source: source.trim(), target: target.trim(), notes: notes?.trim() })
+        const [source, target, notes] = row;
+        if (!source || !target) continue;
+        terms.push({ id: crypto.randomUUID(), source: source.trim(), target: target.trim(), notes: notes?.trim() });
       }
-      onImported(terms)
-      setBusy(false)
-      onOpenChange(false)
-    }
-    reader.readAsText(file)
+      onImported(terms);
+      setBusy(false);
+      onOpenChange(false);
+    };
+    reader.readAsText(file);
   }
 
   return (
@@ -95,8 +95,8 @@ export function GlossaryImportDialog({
               type="file"
               accept=".csv"
               onChange={(e) => {
-                const f = e.target.files?.[0]
-                if (f) parseFile(f, resolveDelimiter(delimiter))
+                const f = e.target.files?.[0];
+                if (f) parseFile(f, resolveDelimiter(delimiter));
               }}
             />
           </div>
@@ -113,5 +113,5 @@ export function GlossaryImportDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
