@@ -2,13 +2,13 @@
 
 import type React from "react";
 
-import { Button } from "@/shared/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card";
-import { Input } from "@/shared/ui/input";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Plus, UploadCloud, FolderOpen, FileText, ArrowRight, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
-import { loadAllProjects, importProjectFromFile, deleteProject } from "@/entities/project/lib/storage";
-import type { Project } from "@/entities/project/model";
+import { loadAllProjects, importProjectFromFile, deleteProject } from "@/features/project/lib/storage";
+import type { Project } from "@/features/project/types";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function HomePage() {

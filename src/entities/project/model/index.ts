@@ -1,6 +1,0 @@
-export * from "./translation"
-export * from "./profile"
-export * from "./glossary"
-export * from "./ai"
-export * from "./dashboard"
-export * from "./project"

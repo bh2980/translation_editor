@@ -2,7 +2,7 @@
 
 import * as XLSX from "xlsx"
 import Papa from "papaparse"
-import type { ParsedRow } from "@/shared/types/common"
+import type { ParsedRow } from "@/types/common"
 
 function isValidHeaderRow(cells: any[]): boolean {
   if (!cells || cells.length === 0) return false

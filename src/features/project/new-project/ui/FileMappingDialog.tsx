@@ -8,13 +8,13 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/shared/ui/dialog";
-import { Button } from "@/shared/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
-import type { ParsedRow } from "@/shared/types/common";
-import { ColGroup, ResizableHeaderCell, useResizableColumns } from "@/shared/ui/resizable-columns";
-import { Input } from "@/shared/ui/input";
-import { Spinner } from "@/shared/ui/spinner";
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import type { ParsedRow } from "@/types/common";
+import { ColGroup, ResizableHeaderCell, useResizableColumns } from "@/components/ui/resizable-columns";
+import { Input } from "@/components/ui/input";
+import { Spinner } from "@/components/ui/spinner";
 
 export function FileMappingDialog({
   open,

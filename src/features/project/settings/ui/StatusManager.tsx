@@ -1,9 +1,9 @@
 "use client"
 
 import { useState } from "react"
-import type { TranslationStatus } from "@/entities/project/model"
-import { Button } from "@/shared/ui/button"
-import { Input } from "@/shared/ui/input"
+import type { TranslationStatus } from "@/features/project/settings/types"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Trash2 } from "lucide-react"
 
 const PALETTE = [

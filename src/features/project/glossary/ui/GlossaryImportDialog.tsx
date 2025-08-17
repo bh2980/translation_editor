@@ -2,7 +2,7 @@
 
 import Papa from "papaparse"
 import { useRef, useState } from "react"
-import { Button } from "@/shared/ui/button"
+import { Button } from "@/components/ui/button"
 import {
   Dialog,
   DialogContent,
@@ -10,11 +10,11 @@ import {
   DialogHeader,
   DialogTitle,
   DialogFooter,
-} from "@/shared/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select"
-import { Input } from "@/shared/ui/input"
-import type { GlossaryTerm } from "@/entities/project/model"
-import { Spinner } from "@/shared/ui/spinner"
+} from "@/components/ui/dialog"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { Input } from "@/components/ui/input"
+import type { GlossaryTerm } from "@/features/project/glossary/types"
+import { Spinner } from "@/components/ui/spinner"
 
 export function GlossaryImportDialog({
   open,

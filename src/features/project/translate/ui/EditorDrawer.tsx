@@ -1,11 +1,13 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/shared/ui/sheet"
-import { Textarea } from "@/shared/ui/textarea"
-import { Button } from "@/shared/ui/button"
-import type { GlossaryTerm, Project, TranslationEntry } from "@/entities/project/model"
-import { TokenizedText, extractTokens, findMissingTokens } from "@/shared/lib/tokenize"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
+import { Textarea } from "@/components/ui/textarea"
+import { Button } from "@/components/ui/button"
+import type { Project } from "@/features/project/types"
+import type { GlossaryTerm } from "@/features/project/glossary/types"
+import type { TranslationEntry } from "@/features/project/translate/types"
+import { TokenizedText, extractTokens, findMissingTokens } from "@/lib/tokenize"
 import { Wand2, Save } from "lucide-react"
 
 export function EditorDrawer({

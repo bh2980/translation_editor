@@ -1,7 +1,8 @@
-import type { TranslationStatus, TranslationEntry } from "./translation"
-import type { Profile } from "./profile"
-import type { GlossaryTerm } from "./glossary"
-import type { AIAgentSettings, APIUsageRecord } from "./ai"
+import type { TranslationStatus } from "./settings/types"
+import type { TranslationEntry } from "./translate/types"
+import type { Profile } from "./profiles/types"
+import type { GlossaryTerm } from "./glossary/types"
+import type { AIAgentSettings, APIUsageRecord } from "./ai-agent/types"
 
 export type Project = {
   id: string
@@ -17,5 +18,6 @@ export type Project = {
   aiAgent: AIAgentSettings
   columnMapping?: { key: string; source: string; target?: string; status?: string }
   apiUsage?: APIUsageRecord[]
-  dashboardWidgets?: import("./dashboard").DashboardWidget[]
+  dashboardWidgets?: import("./dashboard/types").DashboardWidget[]
 }
+

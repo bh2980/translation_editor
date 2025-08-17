@@ -2,14 +2,15 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import { saveProject } from "@/entities/project/lib/storage"
-import type { Project, AIProvider } from "@/entities/project/model"
-import { Button } from "@/shared/ui/button"
-import { Input } from "@/shared/ui/input"
-import { Textarea } from "@/shared/ui/textarea"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card"
-import { Label } from "@/shared/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select"
+import { saveProject } from "@/features/project/lib/storage"
+import type { Project } from "@/features/project/types"
+import type { AIProvider } from "@/features/project/ai-agent/types"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Textarea } from "@/components/ui/textarea"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Label } from "@/components/ui/label"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useProjectStore } from "@/stores/project-store"
 
 const DEFAULT_TEMPLATE = `You are a professional game localization translator.

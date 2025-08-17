@@ -1,16 +1,16 @@
 "use client"
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Select } from "@/shared/ui/select"
+import { Select } from "@/components/ui/select"
 
 import { useParams } from "react-router-dom"
-import type { TranslationEntry } from "@/entities/project/model"
-import { Button } from "@/shared/ui/button"
-import { Input } from "@/shared/ui/input"
-import { Select as UiSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select"
-import { statusColorToClass } from "@/shared/ui/status-badge"
+import type { TranslationEntry } from "@/features/project/translate/types"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Select as UiSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
+import { statusColorToClass } from "@/components/ui/status-badge"
 import { Wand2, Search, Columns3, SlidersHorizontal, Download } from "lucide-react"
 import { useToast } from "@/hooks/use-toast"
-import { Spinner } from "@/shared/ui/spinner"
+import { Spinner } from "@/components/ui/spinner"
 import {
   flexRender,
   getCoreRowModel,
@@ -20,7 +20,7 @@ import {
   getFilteredRowModel,
   type ColumnFiltersState,
 } from "@tanstack/react-table"
-import { Checkbox } from "@/shared/ui/checkbox"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -28,18 +28,18 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu"
+} from "@/components/ui/dropdown-menu"
 import { EditorCellPopover, EditorDrawerLeft, EditorSplitView, type EditorMode } from "@/features/project/translate/ui/EditorPanel"
-import { TextColumnFilter, StatusColumnFilter } from "@/shared/ui/column-filter"
-import { Switch } from "@/shared/ui/switch"
-import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover"
+import { TextColumnFilter, StatusColumnFilter } from "@/components/ui/column-filter"
+import { Switch } from "@/components/ui/switch"
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
 import {
   SelectTrigger as STrigger,
   SelectValue as SValue,
   SelectContent as SContent,
   SelectItem as SItem,
-} from "@/shared/ui/select"
-import { exportObjectsToCsv } from "@/shared/lib/csv"
+} from "@/components/ui/select"
+import { exportObjectsToCsv } from "@/lib/csv"
 import { useProjectStore } from "@/stores/project-store"
 
 export default function TranslatePage() {
