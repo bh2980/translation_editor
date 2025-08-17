@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Input } from "@/components/ui/input"
-import type { GlossaryTerm } from "@/lib/types"
+import type { GlossaryTerm } from "@/types"
 import { Spinner } from "./spinner"
 
 export function GlossaryImportDialog({

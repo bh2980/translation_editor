@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet"
 import { Textarea } from "@/components/ui/textarea"
 import { Button } from "@/components/ui/button"
-import type { GlossaryTerm, Project, TranslationEntry } from "@/lib/types"
+import type { GlossaryTerm, Project, TranslationEntry } from "@/types"
 import { TokenizedText, extractTokens, findMissingTokens } from "@/lib/tokenize"
 import { Wand2, Save } from "lucide-react"
 

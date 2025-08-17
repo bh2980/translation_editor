@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Plus, UploadCloud, FolderOpen, FileText, ArrowRight, Trash2 } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { loadAllProjects, importProjectFromFile, deleteProject } from "@/lib/storage";
-import type { Project } from "@/lib/types";
+import type { Project } from "@/types";
 import { Link, useNavigate } from "react-router-dom";
 
 export default function HomePage() {
