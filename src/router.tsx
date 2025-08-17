@@ -1,0 +1,40 @@
+import { createBrowserRouter, Navigate } from 'react-router-dom'
+
+// Top-level pages
+import HomePage from '@/pages/Home'
+import NewProjectPage from '@/pages/project/NewProject'
+
+// Project layout + nested pages
+import ProjectLayout from '@/layouts/ProjectLayout'
+import DashboardPage from '@/pages/project/Dashboard'
+import TranslatePage from '@/pages/project/Translate'
+import ProfilesPage from '@/pages/project/Profiles'
+import GlossaryPage from '@/pages/project/Glossary'
+import AIAgentPage from '@/pages/project/AIAgent'
+import SettingsPage from '@/pages/project/Settings'
+
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <HomePage />,
+  },
+  {
+    path: '/project/new',
+    element: <NewProjectPage />,
+  },
+  {
+    path: '/project/:id',
+    element: <ProjectLayout />,
+    children: [
+      { index: true, element: <Navigate to="translate" replace /> },
+      { path: 'dashboard', element: <DashboardPage /> },
+      { path: 'translate', element: <TranslatePage /> },
+      { path: 'profiles', element: <ProfilesPage /> },
+      { path: 'glossary', element: <GlossaryPage /> },
+      { path: 'ai-agent', element: <AIAgentPage /> },
+      { path: 'settings', element: <SettingsPage /> },
+    ],
+  },
+])
+
+export default router
