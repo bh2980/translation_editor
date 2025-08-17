@@ -14,7 +14,7 @@ import { FileMappingDialog } from "@/components/file-mapping-dialog";
 import { parseSpreadsheet } from "@/features/project/new-project/lib/parse-spreadsheet";
 import { createEmptyProject, saveProject, createBlankProject } from "@/entities/project/lib/storage";
 import type { Project, ParsedRow } from "@/types";
-import { v4 as uuidv4 } from "@/lib/uuid";
+import { v4 as uuidv4 } from "@/shared/lib/uuid";
 import { Spinner } from "@/components/spinner";
 import { useProjectStore } from "@/stores/project-store";
 
