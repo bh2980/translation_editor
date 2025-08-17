@@ -3,8 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { Select } from "@/components/ui/select"
 
 import { useParams } from "react-router-dom"
-import { loadProject, saveProject } from "@/lib/storage"
-import type { Project, TranslationEntry } from "@/lib/types"
+import type { TranslationEntry } from "@/types"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select as UiSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -41,13 +40,14 @@ import {
   SelectItem as SItem,
 } from "@/components/ui/select"
 import { exportObjectsToCsv } from "@/lib/csv"
+import { useProjectStore } from "@/stores/project-store"
 
 export default function TranslatePage() {
   const params = useParams<{ id: string }>()
-  const [project, setProject] = useState<Project | null>(null)
-  const [isLoading, setIsLoading] = useState(true)
-  const [query, setQuery] = useState("")
-  const [statusFilter, setStatusFilter] = useState<string>("all")
+  const project = useProjectStore((s) => s.project)
+  const isLoading = useProjectStore((s) => s.isLoading)
+  const load = useProjectStore((s) => s.load)
+  const [globalFilter, setGlobalFilter] = useState("")
   const [selected, setSelected] = useState<TranslationEntry | null>(null)
   const [editorMode, setEditorMode] = useState<EditorMode>(() => {
     if (typeof window !== "undefined") {
@@ -72,10 +72,8 @@ export default function TranslatePage() {
 
   useEffect(() => {
     if (!params?.id) return
-    const p = loadProject(params.id)
-    setProject(p ?? null)
-    setIsLoading(false)
-  }, [params?.id])
+    load(params.id)
+  }, [params?.id, load])
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -91,29 +89,15 @@ export default function TranslatePage() {
 
   const statuses = useMemo(() => project?.statuses ?? [], [project])
 
-  const entries = useMemo(() => {
-    if (!project) return []
-    const q = query.trim().toLowerCase()
-    return project.entries.filter((e) => {
-      const matchQuery =
-        q.length === 0 ||
-        e.key.toLowerCase().includes(q) ||
-        e.source.toLowerCase().includes(q) ||
-        e.target.toLowerCase().includes(q)
-      const matchStatus = statusFilter === "all" || e.statusId === statusFilter
-      return matchQuery && matchStatus
-    })
-  }, [project, query, statusFilter])
-
   function updateEntry(update: TranslationEntry) {
     if (!project) return
     const idx = project.entries.findIndex((e) => e.id === update.id)
     if (idx >= 0) {
-      const next = { ...project }
-      next.entries[idx] = update
-      next.updatedAt = Date.now()
-      setProject(next)
-      saveProject(next)
+      useProjectStore.getState().update((p) => {
+        const next = { ...p }
+        next.entries[idx] = update
+        return next
+      })
     }
   }
 
@@ -199,6 +183,7 @@ export default function TranslatePage() {
       },
       {
         id: "status",
+        accessorFn: (row) => row.statusId,
         header: ({ column }) => (
           <div className="flex items-center justify-between">
             <span>번역 상태</span>
@@ -330,18 +315,30 @@ export default function TranslatePage() {
   )
 
   const table = useReactTable({
-    data: entries,
+    data: project?.entries ?? [],
     columns: cols,
     state: {
       rowSelection,
       columnFilters,
+      globalFilter,
     },
     onColumnFiltersChange: setColumnFilters,
+    onGlobalFilterChange: setGlobalFilter,
     enableRowSelection: true,
     onRowSelectionChange: setRowSelection,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
+    globalFilterFn: (row, _columnId, filterValue: string) => {
+      if (!filterValue) return true
+      const q = String(filterValue).toLowerCase()
+      const e = row.original as TranslationEntry
+      return (
+        e.key.toLowerCase().includes(q) ||
+        e.source.toLowerCase().includes(q) ||
+        e.target.toLowerCase().includes(q)
+      )
+    },
     columnResizeMode: "onChange",
   })
 
@@ -352,7 +349,7 @@ export default function TranslatePage() {
       const first = table.getRowModel().rows[0]?.original as TranslationEntry | undefined
       if (first) setSelected(first)
     }
-  }, [editorMode, entries, selected, table])
+  }, [editorMode, selected, table])
 
   function toggleHighlight(colId: string) {
     setHighlightedCols((prev) => ({ ...prev, [colId]: !prev[colId] }))
@@ -475,12 +472,15 @@ export default function TranslatePage() {
             <Input
               className="w-[240px] pl-8"
               placeholder="검색 (key/원문/번역)"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
+              value={globalFilter}
+              onChange={(e) => setGlobalFilter(e.target.value)}
             />
           </div>
 
-          <UiSelect value={statusFilter} onValueChange={setStatusFilter}>
+          <UiSelect
+            value={(table.getColumn("status")?.getFilterValue() as string) ?? "all"}
+            onValueChange={(v) => table.getColumn("status")?.setFilterValue(v === "all" ? undefined : v)}
+          >
             <SelectTrigger className="w-[160px]">
               <SelectValue placeholder="상태 필터" />
             </SelectTrigger>
