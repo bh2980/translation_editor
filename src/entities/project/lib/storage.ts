@@ -1,6 +1,6 @@
 "use client"
 
-import type { Project, TranslationEntry, TranslationStatus, AIProvider, GlossaryTerm } from "@/types"
+import type { Project, TranslationEntry, TranslationStatus, AIProvider, GlossaryTerm } from "@/entities/project/model"
 
 const LS_KEY = "game-translate-projects"
 

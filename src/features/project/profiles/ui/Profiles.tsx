@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
-import type { Profile } from "@/types"
+import type { Profile } from "@/entities/project/model"
 import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
 import { Textarea } from "@/shared/ui/textarea"

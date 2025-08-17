@@ -5,7 +5,7 @@ import { Input } from "@/shared/ui/input"
 import { Button } from "@/shared/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select"
 import { FilterIcon as Funnel, X } from "lucide-react"
-import type { TranslationEntry, TranslationStatus } from "@/types"
+import type { TranslationEntry, TranslationStatus } from "@/entities/project/model"
 
 export function TextColumnFilter({
   column,

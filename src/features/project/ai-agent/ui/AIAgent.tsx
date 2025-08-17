@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams } from "react-router-dom"
 import { saveProject } from "@/entities/project/lib/storage"
-import type { Project, AIProvider } from "@/types"
+import type { Project, AIProvider } from "@/entities/project/model"
 import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
 import { Textarea } from "@/shared/ui/textarea"

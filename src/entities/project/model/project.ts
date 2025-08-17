@@ -19,4 +19,3 @@ export type Project = {
   apiUsage?: APIUsageRecord[]
   dashboardWidgets?: import("./dashboard").DashboardWidget[]
 }
-

@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/shared/ui/popover"
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/shared/ui/sheet"
 import { Textarea } from "@/shared/ui/textarea"
 import { Button } from "@/shared/ui/button"
-import type { GlossaryTerm, Project, TranslationEntry } from "@/types"
+import type { GlossaryTerm, Project, TranslationEntry } from "@/entities/project/model"
 import { TokenizedText, extractTokens, findMissingTokens } from "@/shared/lib/tokenize"
 import { Wand2, Save } from "lucide-react"
 

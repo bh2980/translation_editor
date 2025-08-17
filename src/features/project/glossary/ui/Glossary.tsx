@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react"
 import { useParams } from "react-router-dom"
-import type { GlossaryTerm } from "@/types"
+import type { GlossaryTerm } from "@/entities/project/model"
 import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
 import { Textarea } from "@/shared/ui/textarea"

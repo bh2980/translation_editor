@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useMemo } from "react"
 import { useParams } from "react-router-dom"
-import type { DashboardWidget } from "@/types"
+import type { DashboardWidget } from "@/entities/project/model"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/shared/ui/card"
 import { Button } from "@/shared/ui/button"
 import { Settings, TrendingUp, FileText, BookOpen, Zap } from "lucide-react"

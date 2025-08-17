@@ -3,7 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react"
 import { Select } from "@/shared/ui/select"
 
 import { useParams } from "react-router-dom"
-import type { TranslationEntry } from "@/types"
+import type { TranslationEntry } from "@/entities/project/model"
 import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
 import { Select as UiSelect, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select"

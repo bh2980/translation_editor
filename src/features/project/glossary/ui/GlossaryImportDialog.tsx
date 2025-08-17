@@ -13,7 +13,7 @@ import {
 } from "@/shared/ui/dialog"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select"
 import { Input } from "@/shared/ui/input"
-import type { GlossaryTerm } from "@/types"
+import type { GlossaryTerm } from "@/entities/project/model"
 import { Spinner } from "@/shared/ui/spinner"
 
 export function GlossaryImportDialog({

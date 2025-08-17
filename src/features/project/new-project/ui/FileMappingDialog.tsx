@@ -11,7 +11,7 @@ import {
 } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
-import type { ParsedRow } from "@/types";
+import type { ParsedRow } from "@/shared/types/common";
 import { ColGroup, ResizableHeaderCell, useResizableColumns } from "@/shared/ui/resizable-columns";
 import { Input } from "@/shared/ui/input";
 import { Spinner } from "@/shared/ui/spinner";

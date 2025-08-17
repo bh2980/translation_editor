@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import type { TranslationStatus } from "@/types"
+import type { TranslationStatus } from "@/entities/project/model"
 import { Button } from "@/shared/ui/button"
 import { Input } from "@/shared/ui/input"
 import { Trash2 } from "lucide-react"
