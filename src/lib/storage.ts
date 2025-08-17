@@ -1,6 +1,10 @@
 "use client"
 
-import type { Project, TranslationEntry, TranslationStatus, AIProvider, GlossaryTerm } from "@/entities/project/model"
+import type { Project } from "@/features/project/types"
+import type { TranslationEntry } from "@/features/project/translate/types"
+import type { TranslationStatus } from "@/features/project/settings/types"
+import type { AIProvider } from "@/features/project/ai-agent/types"
+import type { GlossaryTerm } from "@/features/project/glossary/types"
 
 const LS_KEY = "game-translate-projects"
 
@@ -204,13 +208,15 @@ export function createEmptyProject({
     const target = mapping.target ? String(r[mapping.target] ?? "") : ""
     const rawStatus = mapping.status ? String(r[mapping.status] ?? "") : ""
     const statusId =
-      rawStatus && statusByName.get(rawStatus) ? (statusByName.get(rawStatus) as string) : defaultStatusId
+      rawStatus && statusByName.has(rawStatus) ? (statusByName.get(rawStatus) as string) : defaultStatusId
     return {
       id: crypto.randomUUID(),
       key,
       source,
       target,
       statusId,
+      notes: "",
+      meta: { rowIndex: i },
     }
   })
 
@@ -282,3 +288,4 @@ export function createBlankProject({
   }
   return project
 }
+
