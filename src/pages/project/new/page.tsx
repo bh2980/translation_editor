@@ -1,7 +1,6 @@
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
-import { Label } from "@/shared/ui/label";
 import {
   Select,
   SelectContent,
@@ -10,24 +9,32 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 import { ChevronLeft } from "lucide-react";
-
-const LANGS = [
-  { code: "ko", label: "Korean (ko)" },
-  { code: "en", label: "English (en)" },
-  { code: "ja", label: "Japanese (ja)" },
-  { code: "zh-CN", label: "Chinese Simplified (zh-CN)" },
-  { code: "zh-TW", label: "Chinese Traditional (zh-TW)" },
-  { code: "de", label: "German (de)" },
-  { code: "fr", label: "French (fr)" },
-  { code: "es", label: "Spanish (es)" },
-];
+import { useForm } from "react-hook-form";
+import { Project } from "@/entities/project";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+} from "@/shared/ui/form";
+import { LANGUAGE_CODE_MAP } from "@/shared/constants/language-codes";
+import { db } from "@/shared/lib/db";
 
 export default function NewProjectPage() {
   const navigate = useNavigate();
+  const methods = useForm<Project>({
+    defaultValues: {
+      name: "새 프로젝트",
+      sourceLang: "en",
+      targetLang: "ko",
+    },
+  });
 
-  const goToNextStep = () => {
-    // Navigate to a dummy project ID
-    navigate(`/project/dummy-project-id/translate`);
+  const submitProject = async (project: Project) => {
+    const id = await db.projects.add(project);
+
+    navigate(`/project/${id}/translate`);
   };
 
   return (
@@ -48,47 +55,75 @@ export default function NewProjectPage() {
         </p>
       </div>
 
-      <div className="space-y-6">
+      <Form {...methods}>
         <form className="grid gap-6 sm:grid-cols-2">
-          <div className="space-y-2 col-span-2">
-            <Label htmlFor="name">프로젝트 이름</Label>
-            <Input id="name" defaultValue="새 프로젝트" />
-          </div>
-          <div className="space-y-2">
-            <Label>소스 언어</Label>
-            <Select defaultValue="ko">
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="소스 언어" />
-              </SelectTrigger>
-              <SelectContent>
-                {LANGS.map((l) => (
-                  <SelectItem key={l.code} value={l.code}>
-                    {l.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>타겟 언어</Label>
-            <Select defaultValue="en">
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="타겟 언어" />
-              </SelectTrigger>
-              <SelectContent>
-                {LANGS.map((l) => (
-                  <SelectItem key={l.code} value={l.code}>
-                    {l.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          <FormField
+            control={methods.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem className="space-y-2 col-span-2">
+                <FormLabel>프로젝트 이름</FormLabel>
+                <FormControl>
+                  <Input {...field} />
+                </FormControl>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={methods.control}
+            name="sourceLang"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>소스 언어</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="소스 언어" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {Object.entries(LANGUAGE_CODE_MAP).map(
+                      ([langCode, language]) => (
+                        <SelectItem key={langCode} value={langCode}>
+                          {`${language} (${langCode})`}
+                        </SelectItem>
+                      )
+                    )}
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={methods.control}
+            name="targetLang"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>소스 언어</FormLabel>
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="소스 언어" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {Object.entries(LANGUAGE_CODE_MAP).map(
+                      ([langCode, language]) => (
+                        <SelectItem key={langCode} value={langCode}>
+                          {`${language} (${langCode})`}
+                        </SelectItem>
+                      )
+                    )}
+                  </SelectContent>
+                </Select>
+              </FormItem>
+            )}
+          />
         </form>
-      </div>
+      </Form>
 
       <div className="flex justify-end">
-        <Button onClick={goToNextStep}>생성하기</Button>
+        <Button onClick={methods.handleSubmit(submitProject)}>생성하기</Button>
       </div>
     </main>
   );
