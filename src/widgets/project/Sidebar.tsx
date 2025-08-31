@@ -7,7 +7,6 @@ import {
   Bot,
   BarChart3,
   LogOut,
-  ChevronDown,
 } from "lucide-react";
 
 import {
@@ -23,18 +22,22 @@ import {
   SidebarTrigger,
 } from "@/shared/ui/sidebar";
 
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu";
-
 import { Separator } from "@/shared/ui/separator";
+import { db } from "@/shared/lib/db";
+
+import { useLiveQuery } from "dexie-react-hooks";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 
 export const ProjectSidebar = () => {
   const { id } = useParams<{ id: string }>();
   const { pathname } = useLocation();
+  const projects = useLiveQuery(() => db.projects.toArray());
 
   const nav = [
     { href: `/project/${id}/dashboard`, label: "대시보드", icon: BarChart3 },
@@ -50,11 +53,30 @@ export const ProjectSidebar = () => {
       <SidebarHeader>
         <SidebarMenu>
           <SidebarMenuItem>
-            <DropdownMenu>
+            <Select value={id}>
+              <div className="flex gap-2">
+                <SelectTrigger className="w-full border-none shadow-none group-data-[collapsible=icon]:hidden">
+                  <SelectValue placeholder="Select Project" />
+                </SelectTrigger>
+                <Separator
+                  orientation="vertical"
+                  className="mx-2 !h-[32px] group-data-[collapsible=icon]:hidden"
+                />
+                <SidebarTrigger />
+              </div>
+              <SelectContent>
+                {projects?.map((project) => (
+                  <SelectItem value={project.id.toString()}>
+                    {project.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {/* <DropdownMenu>
               <div className="flex gap-2">
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton className="group-data-[collapsible=icon]:hidden">
-                    Select Workspace
+                    Select Project
                     <ChevronDown className="ml-auto" />
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
@@ -65,11 +87,13 @@ export const ProjectSidebar = () => {
                 <SidebarTrigger />
               </div>
               <DropdownMenuContent className="w-[--radix-popper-anchor-width]">
-                <DropdownMenuItem>
-                  <span>Acme Inc</span>
-                </DropdownMenuItem>
+                {projects?.map((project) => (
+                  <DropdownMenuItem key={project.id}>
+                    <span>{project.name}</span>
+                  </DropdownMenuItem>
+                ))}
               </DropdownMenuContent>
-            </DropdownMenu>
+            </DropdownMenu> */}
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
