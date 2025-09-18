@@ -1,106 +1,91 @@
 "use client";
-import {
-  EditorDrawerLeft,
-  EditorSplitView,
-} from "@/widgets/editor/EditorPanel";
-import { EditorHeader } from "@/widgets/editor/EditorHeader";
+import EditorToolbar from "@/widgets/editor/EditorToolbar";
 import { EditorDataTable } from "@/widgets/editor/EditorDataTable";
 import { useTranslateEditor } from "@/features/editor/useTranslateEditor";
+import { useNavigate, useParams } from "react-router-dom";
+import { useLiveQuery } from "dexie-react-hooks";
+import { db } from "@/shared/lib/db";
+import { useEffect, useMemo, useState } from "react";
+import type { LanguageCode } from "@/shared/constants/language-codes";
+import JsonImportDialog from "@/features/import/JsonImportDialog";
 
 export default function TranslatePage() {
-  const {
-    // data
-    entries,
-    statuses,
-    // view state
-    editorMode,
-    selected,
-    autoNext,
-    exportDelim,
-    globalFilter,
-    highlightedCols,
-    // actions
-    setEditorMode,
-    setSelected,
-    setAutoNext,
-    setExportDelim,
-    setGlobalFilter,
-    toggleHighlight,
-    updateEntry,
-    moveToNext,
-    // table
-    table,
-  } = useTranslateEditor();
+  const { id } = useParams<{ id: string }>();
+  const project = useLiveQuery(async () => {
+    if (!id) return undefined;
+    return db.projects.get(Number(id));
+  }, [id]);
+  const targetLangs = useMemo(() => (project?.targetLang as LanguageCode[] | undefined) ?? [], [project]);
+  const [currentLang, setCurrentLang] = useState<LanguageCode | undefined>(
+    targetLangs[0]
+  );
+  const navigate = useNavigate();
+  const [showJsonImport, setShowJsonImport] = useState(false);
+  const [importText, setImportText] = useState<string | undefined>(undefined);
+  useEffect(() => {
+    if (!currentLang && targetLangs.length > 0) {
+      setCurrentLang(targetLangs[0]);
+    }
+  }, [targetLangs, currentLang]);
+  const { entries, globalFilter, highlightedCols, setGlobalFilter, toggleHighlight, table } = useTranslateEditor({
+    projectId: id ? Number(id) : undefined,
+    targetLang: currentLang,
+  });
 
   return (
-    <div className="space-y-6 flex flex-col w-screen">
-      <EditorHeader
-        projectName="샘플 프로젝트"
-        entriesCount={entries.length}
+    <div className="flex flex-col gap-6 w-full flex-1 min-h-0">
+      <EditorToolbar
+        targetLangs={targetLangs}
+        currentLang={currentLang}
+        onChangeLang={(c) => setCurrentLang(c)}
+        onImportJson={async (file) => {
+          try {
+            const text = await file.text();
+            setImportText(text);
+          } catch (e) {
+            // ignore
+          }
+          setShowJsonImport(true);
+        }}
+        onImportCsv={(file) => {
+          alert(`CSV 불러오기: ${file.name} (더미)`);
+        }}
+        onExportJson={() => {
+          alert("JSON으로 내보내기 (더미)");
+        }}
         globalFilter={globalFilter}
         setGlobalFilter={setGlobalFilter}
-        table={table}
-        statuses={statuses}
-        highlightedCols={highlightedCols}
-        toggleHighlight={toggleHighlight}
-        editorMode={editorMode}
-        setEditorMode={setEditorMode}
-        autoNext={autoNext}
-        setAutoNext={setAutoNext}
-        exportDelim={exportDelim}
-        setExportDelim={setExportDelim}
+        selectionCount={table.getSelectedRowModel().rows.length}
+        onDeleteSelected={async () => {
+          const ids = table
+            .getSelectedRowModel()
+            .rows.map((r) => r.original.unitId)
+            .filter((v): v is number => typeof v === "number");
+          if (!ids.length) return;
+          if (!confirm(`${ids.length}건을 삭제할까요?`)) return;
+          await db.translationUnits.bulkDelete(ids as any);
+          table.resetRowSelection();
+        }}
+        onAddLanguage={() => navigate(`/project/${id}/settings`)}
+      />
+      <JsonImportDialog
+        open={showJsonImport}
+        onOpenChange={setShowJsonImport}
+        projectId={Number(id)}
+        targetLangs={targetLangs}
+        initialText={importText}
+        sourceLang={project?.sourceLang as any}
       />
 
-      {editorMode !== "split" ? (
-        <>
-          <div className="h-[70vh]">
-            <EditorDataTable
-              table={table}
-              editorMode={editorMode}
-              selectedId={selected?.id}
-              onRowClick={(e) => setSelected(e)}
-              highlightedCols={highlightedCols}
-              onHeaderToggleHighlight={toggleHighlight}
-            />
-          </div>
-          <EditorDrawerLeft
-            open={editorMode === "drawer-left" && !!selected}
-            onOpenChange={(o) => !o && setSelected(null)}
-            entry={selected}
-            onSave={(upd) => {
-              updateEntry(upd);
-              if (autoNext) moveToNext(upd.id);
-              else setSelected(null);
-            }}
-            glossary={[]}
-            project={{}}
-          />
-        </>
-      ) : (
-        <div className="grid h-[70vh] gap-6 lg:grid-cols-[minmax(600px,1fr)_minmax(360px,1fr)]">
-          <div>
-            <EditorDataTable
-              table={table}
-              editorMode={editorMode}
-              selectedId={selected?.id}
-              onRowClick={(e) => setSelected(e)}
-              highlightedCols={highlightedCols}
-              onHeaderToggleHighlight={toggleHighlight}
-            />
-          </div>
-          <div className="h-full overflow-auto rounded-md border">
-            <EditorSplitView
-              entry={selected}
-              onSave={(upd) => {
-                updateEntry(upd);
-                if (autoNext) moveToNext(upd.id);
-              }}
-              glossary={[]}
-              project={{}}
-            />
-          </div>
-        </div>
-      )}
+      <div className="flex-1 min-h-0 overflow-hidden">
+        <EditorDataTable
+          table={table}
+          editorMode={"popover"}
+          selectedId={null}
+          highlightedCols={highlightedCols}
+          onHeaderToggleHighlight={toggleHighlight}
+        />
+      </div>
     </div>
   );
 }
