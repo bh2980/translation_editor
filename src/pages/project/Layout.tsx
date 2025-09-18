@@ -8,8 +8,8 @@ export default function ProjectLayout({ children }: { children?: ReactNode }) {
   return (
     <SidebarProvider>
       <ProjectSidebar />
-      <SidebarInset>
-        <main className="p-4 md:p-8">{children ?? <Outlet />}</main>
+      <SidebarInset className="max-h-screen min-w-0 p-4 md:p-8 flex-1 flex flex-col min-h-0">
+        {children ?? <Outlet />}
       </SidebarInset>
     </SidebarProvider>
   );
