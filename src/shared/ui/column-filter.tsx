@@ -11,14 +11,14 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 import { FilterIcon as Funnel, X } from "lucide-react";
-import type { TranslationEntry } from "@/features/translate/types";
+import type { Entry } from "@/entities/editor/types";
 import { TranslationStatus } from "@/features/project/types";
 
 export function TextColumnFilter({
   column,
   placeholder,
 }: {
-  column: Column<TranslationEntry, unknown>;
+  column: Column<Entry, unknown>;
   placeholder?: string;
 }) {
   const value = (column.getFilterValue() as string) ?? "";
@@ -62,7 +62,7 @@ export function StatusColumnFilter({
   column,
   statuses,
 }: {
-  column: Column<TranslationEntry, unknown>;
+  column: Column<Entry, unknown>;
   statuses: TranslationStatus[];
 }) {
   const value = (column.getFilterValue() as string) ?? "";
