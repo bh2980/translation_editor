@@ -25,6 +25,7 @@ export function EditorContent({
   value,
   setValue,
   glossary,
+  similar = [],
   onSave,
 }: {
   entry: any;
@@ -32,6 +33,7 @@ export function EditorContent({
   setValue: (v: string) => void;
   glossary: any[];
   project: any;
+  similar?: any[];
   onSave: (entry: any) => void;
 }) {
   const missing = useMemo(() => findMissingTokens(), [value]);
@@ -79,9 +81,7 @@ export function EditorContent({
       </div>
 
       <div>
-        <div className="mb-1 text-xs font-medium text-muted-foreground">
-          용어집 미리보기
-        </div>
+        <div className="mb-1 text-xs font-medium text-muted-foreground">용어집</div>
         <div className="max-h-40 overflow-auto rounded-md border">
           <table className="w-full text-xs">
             <thead className="bg-muted/50">
@@ -103,6 +103,37 @@ export function EditorContent({
                 <tr>
                   <td colSpan={3} className="px-2 py-2 text-muted-foreground">
                     용어 없음
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div>
+        <div className="mb-1 text-xs font-medium text-muted-foreground">비슷한 문장</div>
+        <div className="max-h-40 overflow-auto rounded-md border">
+          <table className="w-full text-xs">
+            <thead className="bg-muted/50">
+              <tr className="text-left">
+                <th className="px-2 py-1">key</th>
+                <th className="px-2 py-1">원문</th>
+                <th className="px-2 py-1">번역</th>
+              </tr>
+            </thead>
+            <tbody>
+              {similar.slice(0, 20).map((s: any, i: number) => (
+                <tr key={`${s.key}-${i}`} className="border-t">
+                  <td className="px-2 py-1 font-mono text-[11px]">{s.key}</td>
+                  <td className="px-2 py-1">{s.source}</td>
+                  <td className="px-2 py-1">{s.target ?? ""}</td>
+                </tr>
+              ))}
+              {(!similar || similar.length === 0) && (
+                <tr>
+                  <td colSpan={3} className="px-2 py-2 text-muted-foreground">
+                    유사 문장 없음
                   </td>
                 </tr>
               )}
@@ -195,6 +226,7 @@ export function EditorCellPopover({
   onSaved,
   glossary,
   project,
+  findSimilar,
 }: {
   children: React.ReactNode;
   entry: any;
@@ -202,10 +234,27 @@ export function EditorCellPopover({
   onSaved?: (saved: any) => void;
   glossary: any[];
   project: any;
+  findSimilar?: (entry: any) => Promise<any[]>;
 }) {
   const [open, setOpen] = useState(false);
   const [value, setValue] = useState(entry?.target ?? "");
+  const [similar, setSimilar] = useState<any[]>([]);
   useEffect(() => setValue(entry?.target ?? ""), [entry?.target]);
+  useEffect(() => {
+    if (!open) return;
+    let active = true;
+    (async () => {
+      if (findSimilar) {
+        const list = await findSimilar(entry);
+        if (active) setSimilar(list ?? []);
+      } else {
+        setSimilar([]);
+      }
+    })();
+    return () => {
+      active = false;
+    };
+  }, [open, entry, findSimilar]);
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>{children}</PopoverTrigger>
@@ -221,6 +270,7 @@ export function EditorCellPopover({
           setValue={setValue}
           glossary={glossary}
           project={project}
+          similar={similar}
           onSave={(e) => {
             onSave(e);
             setOpen(false);
