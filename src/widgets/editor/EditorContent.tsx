@@ -102,7 +102,17 @@ export function EditorContent({
         state.token.action.kind === "pair"
           ? state.token.action.open
           : state.token.action.value;
-      const label = baseLabel && baseLabel.length > 0 ? baseLabel : fallback;
+      let label: string;
+      if (
+        state.token.action.kind === "single" &&
+        (state.token.action.role === "open" || state.token.action.role === "close")
+      ) {
+        label = state.token.action.value;
+      } else if (baseLabel && baseLabel.length > 0) {
+        label = baseLabel;
+      } else {
+        label = fallback;
+      }
       return total > 1 ? `${label} #${state.token.index + 1}` : label;
     },
     []

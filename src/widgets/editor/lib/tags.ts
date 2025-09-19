@@ -26,6 +26,8 @@ export type TextNode = BaseNode & {
   value: string;
 };
 
+export type TagVariant = "paired" | "selfClosing" | "openOnly" | "closeOnly";
+
 export type TagNode = BaseNode & {
   type: "tag";
   name: string;
@@ -34,6 +36,7 @@ export type TagNode = BaseNode & {
   rawClose?: string;
   selfClosing: boolean;
   children: RichTextNode[];
+  variant: TagVariant;
 };
 
 export type PlaceholderNode = BaseNode & {
@@ -127,13 +130,24 @@ export function parseRichText(input: string): RichTextNode[] {
           const tagNode = top as TagNode;
           if (tagNode.name.toLowerCase() === name.toLowerCase()) {
             tagNode.rawClose = raw;
+            tagNode.variant = "paired";
             stack.pop();
             index = end + 1;
             continue;
           }
         }
 
-        addText(raw);
+        const orphanNode: TagNode = {
+          type: "tag",
+          id: nextId(),
+          name,
+          rawOpen: raw,
+          rawClose: raw,
+          selfClosing: false,
+          children: [],
+          variant: "closeOnly",
+        };
+        addNode(orphanNode);
         index = end + 1;
         continue;
       }
@@ -168,6 +182,7 @@ export function parseRichText(input: string): RichTextNode[] {
         rawOpen: raw,
         selfClosing,
         children: [],
+        variant: selfClosing ? "selfClosing" : "openOnly",
       };
 
       addNode(tagNode);
@@ -209,6 +224,12 @@ export function parseRichText(input: string): RichTextNode[] {
   return root.children;
 }
 
+export type SingleTagRole =
+  | "selfClosing"
+  | "placeholder"
+  | "open"
+  | "close";
+
 export type TagAction =
   | {
       kind: "pair";
@@ -220,6 +241,7 @@ export type TagAction =
       kind: "single";
       value: string;
       label: string;
+      role: SingleTagRole;
     };
 
 const TOKEN_KEY_PREFIX = {
@@ -241,25 +263,46 @@ export function buildTagActionFromNode(
       kind: "single",
       value: node.raw,
       label: node.raw,
+      role: "placeholder",
     };
   }
 
   const label = [node.name, node.attributes].filter(Boolean).join(" ");
-  if (node.selfClosing) {
-    return {
-      kind: "single",
-      value: node.rawOpen,
-      label,
-    };
+  switch (node.variant) {
+    case "selfClosing":
+      return {
+        kind: "single",
+        value: node.rawOpen,
+        label,
+        role: "selfClosing",
+      };
+    case "openOnly":
+      return {
+        kind: "single",
+        value: node.rawOpen,
+        label,
+        role: "open",
+      };
+    case "closeOnly": {
+      const raw = node.rawClose ?? node.rawOpen;
+      return {
+        kind: "single",
+        value: raw,
+        label,
+        role: "close",
+      };
+    }
+    case "paired":
+    default: {
+      const closeTag = node.rawClose ?? `</${node.name}>`;
+      return {
+        kind: "pair",
+        open: node.rawOpen,
+        close: closeTag,
+        label,
+      };
+    }
   }
-
-  const closeTag = node.rawClose ?? `</${node.name}>`;
-  return {
-    kind: "pair",
-    open: node.rawOpen,
-    close: closeTag,
-    label,
-  };
 }
 
 export function collectTokenStrings(nodes: RichTextNode[]): string[] {
@@ -268,16 +311,26 @@ export function collectTokenStrings(nodes: RichTextNode[]): string[] {
 
   const visit = (node: RichTextNode) => {
     if (node.type === "tag") {
-      if (!seen.has(node.rawOpen)) {
-        tokens.push(node.rawOpen);
-        seen.add(node.rawOpen);
+      if (node.variant !== "closeOnly") {
+        if (!seen.has(node.rawOpen)) {
+          tokens.push(node.rawOpen);
+          seen.add(node.rawOpen);
+        }
       }
 
-      if (!node.selfClosing) {
+      if (node.variant === "paired") {
         const closeTag = node.rawClose ?? `</${node.name}>`;
         if (!seen.has(closeTag)) {
           tokens.push(closeTag);
           seen.add(closeTag);
+        }
+      }
+
+      if (node.variant === "closeOnly") {
+        const raw = node.rawClose ?? node.rawOpen;
+        if (!seen.has(raw)) {
+          tokens.push(raw);
+          seen.add(raw);
         }
       }
 
@@ -395,10 +448,53 @@ export function removeTokenInstance(
     const index = occurrences.get(key) ?? 0;
     occurrences.set(key, index + 1);
 
+    const variant = node.variant ?? (node.selfClosing ? "selfClosing" : "openOnly");
+
+    if (variant === "closeOnly") {
+      const raw = node.rawClose ?? node.rawOpen;
+      const rawLength = raw.length;
+      if (!removed && key === target.key && index === target.index) {
+        removed = true;
+        selectionStart = startOffset;
+        selectionEnd = startOffset;
+        return { text: "", length: rawLength };
+      }
+
+      return { text: raw, length: rawLength };
+    }
+
     const open = node.rawOpen;
     const openLength = open.length;
 
-    if (action.kind === "single") {
+    let childText = "";
+    let childLength = 0;
+    for (const child of node.children) {
+      const childResult = visit(
+        child,
+        startOffset + openLength + childLength
+      );
+      childText += childResult.text;
+      childLength += childResult.length;
+    }
+
+    if (variant === "openOnly") {
+      if (!removed && key === target.key && index === target.index) {
+        removed = true;
+        selectionStart = startOffset;
+        selectionEnd = startOffset;
+        return {
+          text: childText,
+          length: openLength + childLength,
+        };
+      }
+
+      return {
+        text: open + childText,
+        length: openLength + childLength,
+      };
+    }
+
+    if (variant === "selfClosing") {
       if (!removed && key === target.key && index === target.index) {
         removed = true;
         selectionStart = startOffset;
@@ -411,17 +507,6 @@ export function removeTokenInstance(
 
     const close = node.rawClose ?? `</${node.name}>`;
     const closeLength = close.length;
-
-    let childText = "";
-    let childLength = 0;
-    for (const child of node.children) {
-      const childResult = visit(
-        child,
-        startOffset + openLength + childLength
-      );
-      childText += childResult.text;
-      childLength += childResult.length;
-    }
 
     if (!removed && key === target.key && index === target.index) {
       removed = true;

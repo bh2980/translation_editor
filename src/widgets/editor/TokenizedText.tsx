@@ -25,6 +25,8 @@ export type TokenRenderState = {
   color: TokenColor;
 };
 
+type SingleTagVariant = "selfClosing" | "openOnly" | "closeOnly";
+
 export function TokenizedText({
   text = "",
   tokens,
@@ -123,11 +125,11 @@ function PlaceholderToken({ node, state, onToggle }: PlaceholderTokenProps) {
       onClick={handleToggle}
       onKeyDown={handleKeyDown}
       className={cn(
-        "inline-flex max-w-full items-center gap-1 rounded border px-1 py-[1px] align-middle text-[11px] font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
+        "inline-flex items-center gap-1 rounded border px-1 py-[1px] align-baseline text-[11px] font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
         state ? "cursor-pointer" : "cursor-default",
         applied ? "opacity-70" : "hover:shadow-sm"
       )}
-      style={state ? getTokenStyle(state) : undefined}
+      style={state ? getChipStyle(state) : undefined}
     >
       <span className="font-mono">{node.raw}</span>
     </span>
@@ -142,6 +144,8 @@ type TagTokenProps = {
 };
 
 function TagToken({ node, state, onToggle, renderNode }: TagTokenProps) {
+  const variant =
+    node.variant ?? (node.selfClosing ? "selfClosing" : node.rawClose ? "paired" : "openOnly");
   const applied = state?.applied ?? false;
 
   const handleToggle = (event: React.MouseEvent<HTMLSpanElement>) => {
@@ -161,9 +165,41 @@ function TagToken({ node, state, onToggle, renderNode }: TagTokenProps) {
     }
   };
 
-  const description = node.selfClosing
-    ? node.rawOpen
-    : `${node.rawOpen} … ${node.rawClose ?? `</${node.name}>`}`;
+  const shouldRenderAsChip =
+    variant === "selfClosing" ||
+    variant === "closeOnly" ||
+    (variant === "openOnly" && node.children.length === 0);
+
+  if (shouldRenderAsChip) {
+    const chipVariant: SingleTagVariant =
+      variant === "closeOnly"
+        ? "closeOnly"
+        : variant === "openOnly"
+        ? "openOnly"
+        : "selfClosing";
+    return (
+      <SingleTagToken
+        node={node}
+        variant={chipVariant}
+        state={state}
+        onToggle={onToggle}
+      />
+    );
+  }
+
+  const description =
+    variant === "paired"
+      ? `${node.rawOpen} … ${node.rawClose ?? `</${node.name}>`}`
+      : node.rawOpen;
+
+  const isOpenOnly = variant === "openOnly";
+  const baseHighlightStyle = state ? getHighlightStyle(state) : DEFAULT_HIGHLIGHT_STYLE;
+  const highlightStyle = isOpenOnly
+    ? {
+        ...baseHighlightStyle,
+        borderColor: state ? state.color.accent : "rgba(148, 163, 184, 0.5)",
+      }
+    : baseHighlightStyle;
 
   return (
     <span
@@ -175,30 +211,41 @@ function TagToken({ node, state, onToggle, renderNode }: TagTokenProps) {
       onClick={handleToggle}
       onKeyDown={handleKeyDown}
       className={cn(
-        "inline-flex max-w-full flex-wrap items-baseline gap-x-1 gap-y-0.5 rounded border px-1 py-[1px] align-middle text-xs transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
+        "inline-flex flex-wrap items-baseline gap-x-1 gap-y-0.5 align-baseline transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
         state ? "cursor-pointer" : "cursor-default",
-        applied ? "opacity-70" : "hover:shadow-sm"
+        applied ? "opacity-70" : "hover:brightness-110"
       )}
-      style={state ? getTokenStyle(state) : undefined}
+      style={state ? { color: state.color.text } : undefined}
     >
       <span
-        className="rounded-sm px-[0.35rem] text-[10px] font-semibold uppercase tracking-tight"
+        className="inline-flex items-center rounded px-[0.35rem] text-[10px] font-semibold uppercase tracking-tight"
         style={state ? getLabelStyle(state) : undefined}
       >
         {node.name}
       </span>
       {node.attributes ? (
         <span
-          className="text-[11px]"
-          style={state ? { color: state.color.text } : undefined}
+          className="text-[10px]"
+          style={state ? { color: state.color.mutedText } : undefined}
         >
           {node.attributes}
         </span>
       ) : null}
-      {!node.selfClosing && node.children.length > 0 ? (
+      {isOpenOnly ? (
         <span
-          className="min-w-0 break-words text-sm text-foreground"
-          style={state ? getContentStyle(state) : undefined}
+          className="text-[9px] font-semibold uppercase tracking-wide"
+          style={state ? { color: state.color.accent } : undefined}
+        >
+          OPEN
+        </span>
+      ) : null}
+      {node.children.length > 0 ? (
+        <span
+          className={cn(
+            "inline whitespace-pre-wrap rounded-sm px-1 align-baseline text-sm leading-relaxed",
+            isOpenOnly ? "border-b border-dashed" : undefined
+          )}
+          style={highlightStyle}
         >
           {node.children.map((child) => renderNode(child))}
         </span>
@@ -207,10 +254,81 @@ function TagToken({ node, state, onToggle, renderNode }: TagTokenProps) {
   );
 }
 
-function getTokenStyle(state: TokenRenderState) {
+type SingleTagTokenProps = {
+  node: TagNode;
+  variant: SingleTagVariant;
+  state?: TokenRenderState;
+  onToggle?: (state: TokenRenderState) => void;
+};
+
+function SingleTagToken({ node, variant, state, onToggle }: SingleTagTokenProps) {
+  const applied = state?.applied ?? false;
+  const rawValue = variant === "closeOnly" ? node.rawClose ?? node.rawOpen : node.rawOpen;
+
+  const handleToggle = (event: React.MouseEvent<HTMLSpanElement>) => {
+    event.stopPropagation();
+    if (state) {
+      onToggle?.(state);
+    }
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLSpanElement>) => {
+    if (event.key === "Enter" || event.key === " ") {
+      event.preventDefault();
+      event.stopPropagation();
+      if (state) {
+        onToggle?.(state);
+      }
+    }
+  };
+
+  const metaLabel =
+    variant === "openOnly" ? "OPEN" : variant === "closeOnly" ? "CLOSE" : undefined;
+
+  return (
+    <span
+      role="button"
+      tabIndex={0}
+      title={rawValue}
+      aria-pressed={applied}
+      data-applied={applied ? "true" : "false"}
+      onClick={handleToggle}
+      onKeyDown={handleKeyDown}
+      className={cn(
+        "inline-flex items-center gap-1 rounded border px-1 py-[1px] align-baseline text-[11px] font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
+        state ? "cursor-pointer" : "cursor-default",
+        applied ? "opacity-70" : "hover:shadow-sm",
+        variant === "openOnly" || variant === "closeOnly" ? "border-dashed" : "border-solid"
+      )}
+      style={state ? getChipStyle(state) : undefined}
+    >
+      <span className="font-mono">{rawValue}</span>
+      {metaLabel ? (
+        <span
+          className="text-[9px] font-semibold uppercase tracking-wide"
+          style={state ? { color: state.color.accent } : undefined}
+        >
+          {metaLabel}
+        </span>
+      ) : null}
+    </span>
+  );
+}
+
+const DEFAULT_HIGHLIGHT_STYLE: React.CSSProperties = {
+  backgroundColor: "rgba(148, 163, 184, 0.18)",
+  color: "inherit",
+  borderRadius: "0.35rem",
+  paddingInline: "0.25rem",
+  paddingBlock: "0.05rem",
+  boxShadow: "inset 0 -1px 0 0 rgba(148, 163, 184, 0.35)",
+};
+
+function getChipStyle(state: TokenRenderState) {
   return {
     backgroundColor: state.color.background,
     borderColor: state.color.border,
+    color: state.color.text,
     boxShadow: state.applied
       ? `inset 0 0 0 1px ${state.color.accent}`
       : undefined,
@@ -224,11 +342,16 @@ function getLabelStyle(state: TokenRenderState) {
   } satisfies React.CSSProperties;
 }
 
-function getContentStyle(state: TokenRenderState) {
+function getHighlightStyle(state: TokenRenderState) {
   return {
-    backgroundColor: withAlpha(state.color.accent, 0.12),
-    borderRadius: "0.25rem",
-    paddingInline: "0.2rem",
+    backgroundColor: withAlpha(state.color.accent, 0.18),
+    color: state.color.text,
+    borderRadius: "0.35rem",
+    paddingInline: "0.25rem",
+    paddingBlock: "0.05rem",
+    boxShadow: state.applied
+      ? `inset 0 -1px 0 0 ${state.color.accent}`
+      : `inset 0 -1px 0 0 ${withAlpha(state.color.accent, 0.4)}`,
   } satisfies React.CSSProperties;
 }
 
