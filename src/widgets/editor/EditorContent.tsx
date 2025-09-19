@@ -4,12 +4,13 @@ import * as React from "react";
 import { Button } from "@/shared/ui/button";
 import { Textarea } from "@/shared/ui/textarea";
 import { Wand2, Save } from "lucide-react";
-import { TokenizedText } from "./TokenizedText";
+import { TokenizedText, type TokenRenderState } from "./TokenizedText";
 import {
-  findMissingTokens,
+  enumerateTokenInstances,
   parseRichText,
-  type TagAction,
+  removeTokenInstance,
 } from "./lib/tags";
+import { TOKEN_COLORS } from "./lib/token-colors";
 
 type EditorContentProps = {
   entry: any;
@@ -33,10 +34,86 @@ export function EditorContent({
     () => parseRichText(entry?.source ?? ""),
     [entry?.source]
   );
-  const missingTokens = React.useMemo(
-    () => findMissingTokens(tokens, value ?? ""),
-    [tokens, value]
+  const tokenInstances = React.useMemo(
+    () => enumerateTokenInstances(tokens),
+    [tokens]
   );
+
+  const sourceCounts = React.useMemo(() => {
+    const map = new Map<string, number>();
+    tokenInstances.forEach((instance) => {
+      map.set(instance.key, (map.get(instance.key) ?? 0) + 1);
+    });
+    return map;
+  }, [tokenInstances]);
+
+  const tokenRenderStates = React.useMemo<TokenRenderState[]>(() => {
+    if (tokenInstances.length === 0) {
+      return [];
+    }
+
+    const translationNodes = parseRichText(value ?? "");
+    const translationInstances = enumerateTokenInstances(translationNodes);
+    const translationCounts = new Map<string, number>();
+
+    translationInstances.forEach((instance) => {
+      translationCounts.set(
+        instance.key,
+        (translationCounts.get(instance.key) ?? 0) + 1
+      );
+    });
+
+    return tokenInstances.map((instance, index) => ({
+      token: instance,
+      applied:
+        (translationCounts.get(instance.key) ?? 0) > instance.index,
+      color: TOKEN_COLORS[index % TOKEN_COLORS.length],
+    }));
+  }, [tokenInstances, value]);
+
+  const tokenStateMap = React.useMemo(() => {
+    return tokenRenderStates.reduce<Record<string, TokenRenderState>>(
+      (acc, state) => {
+        acc[state.token.id] = state;
+        return acc;
+      },
+      {}
+    );
+  }, [tokenRenderStates]);
+
+  const tokenUsage = React.useMemo(
+    () =>
+      tokenRenderStates.map((state) => ({
+        state,
+        total: sourceCounts.get(state.token.key) ?? 1,
+      })),
+    [sourceCounts, tokenRenderStates]
+  );
+
+  const missingCount = React.useMemo(
+    () => tokenRenderStates.filter((state) => !state.applied).length,
+    [tokenRenderStates]
+  );
+
+  const formatTokenLabel = React.useCallback(
+    (state: TokenRenderState, total: number) => {
+      const baseLabel = state.token.action.label?.trim();
+      const fallback =
+        state.token.action.kind === "pair"
+          ? state.token.action.open
+          : state.token.action.value;
+      const label = baseLabel && baseLabel.length > 0 ? baseLabel : fallback;
+      return total > 1 ? `${label} #${state.token.index + 1}` : label;
+    },
+    []
+  );
+
+  const describeToken = React.useCallback((state: TokenRenderState) => {
+    if (state.token.action.kind === "pair") {
+      return `${state.token.action.open} … ${state.token.action.close}`;
+    }
+    return state.token.action.value;
+  }, []);
 
   const textareaRef = React.useRef<HTMLTextAreaElement>(null);
   const selectionRef = React.useRef<{ start: number; end: number }>({
@@ -58,8 +135,43 @@ export function EditorContent({
     };
   }, []);
 
-  const handleTagAction = React.useCallback(
-    (action: TagAction) => {
+  const focusTextareaAt = React.useCallback((start: number, end: number) => {
+    requestAnimationFrame(() => {
+      const el = textareaRef.current;
+      if (!el) return;
+      const length = el.value.length;
+      const safeStart = Math.max(0, Math.min(start, length));
+      const safeEnd = Math.max(0, Math.min(end, length));
+      el.focus();
+      el.selectionStart = safeStart;
+      el.selectionEnd = safeEnd;
+      selectionRef.current = { start: safeStart, end: safeEnd };
+    });
+  }, []);
+
+  const handleTokenToggle = React.useCallback(
+    (tokenState: TokenRenderState) => {
+      const action = tokenState.token.action;
+
+      if (tokenState.applied) {
+        const removal = removeTokenInstance(value ?? "", tokenState.token);
+        if (!removal.removed) {
+          return;
+        }
+
+        setValue(removal.text);
+
+        const fallback = selectionRef.current ?? {
+          start: removal.text.length,
+          end: removal.text.length,
+        };
+        const nextStart =
+          removal.selectionStart ?? fallback.start ?? removal.text.length;
+        const nextEnd = removal.selectionEnd ?? nextStart;
+        focusTextareaAt(nextStart, nextEnd);
+        return;
+      }
+
       const currentValue = value ?? "";
       const { start, end } = selectionRef.current ?? {
         start: currentValue.length,
@@ -103,19 +215,9 @@ export function EditorContent({
       }
 
       setValue(nextValue);
-
-      requestAnimationFrame(() => {
-        if (!textareaRef.current) return;
-        textareaRef.current.focus();
-        textareaRef.current.selectionStart = nextSelectionStart;
-        textareaRef.current.selectionEnd = nextSelectionEnd;
-        selectionRef.current = {
-          start: nextSelectionStart,
-          end: nextSelectionEnd,
-        };
-      });
+      focusTextareaAt(nextSelectionStart, nextSelectionEnd);
     },
-    [setValue, value]
+    [focusTextareaAt, setValue, value]
   );
 
   const handleChange = (event: React.ChangeEvent<HTMLTextAreaElement>) => {
@@ -130,7 +232,11 @@ export function EditorContent({
           원문
         </div>
         <div className="rounded-md border p-3 text-sm">
-          <TokenizedText tokens={tokens} onTagAction={handleTagAction} />
+          <TokenizedText
+            tokens={tokens}
+            tokenStates={tokenStateMap}
+            onTokenToggle={handleTokenToggle}
+          />
         </div>
       </div>
 
@@ -148,11 +254,67 @@ export function EditorContent({
           onBlur={updateSelection}
           rows={10}
         />
-        {missingTokens.length > 0 && (
-          <div className="mt-2 text-xs text-amber-600">
-            누락된 태그/토큰: {missingTokens.join(", ")}
+        {tokenUsage.length > 0 ? (
+          <div className="mt-2 space-y-2 text-xs">
+            <div className="flex items-center justify-between">
+              <span className="font-medium text-muted-foreground">
+                태그 사용 현황
+              </span>
+              <span
+                className={
+                  missingCount > 0 ? "text-amber-600" : "text-emerald-600"
+                }
+              >
+                {missingCount > 0
+                  ? `미사용 ${missingCount}개`
+                  : "모든 태그 사용 완료"}
+              </span>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {tokenUsage.map(({ state, total }) => {
+                const label = formatTokenLabel(state, total);
+                return (
+                  <div
+                    key={state.token.id}
+                    className="flex min-w-[160px] flex-1 items-center justify-between gap-2 rounded border px-2 py-1"
+                    style={{
+                      borderColor: state.color.border,
+                      borderStyle: state.applied ? "solid" : "dashed",
+                      backgroundColor: state.applied
+                        ? state.color.background
+                        : "transparent",
+                    }}
+                  >
+                    <div className="flex min-w-0 items-center gap-2">
+                      <span
+                        className="inline-flex h-2.5 w-2.5 flex-none rounded-full"
+                        style={{ backgroundColor: state.color.accent }}
+                      />
+                      <span
+                        className="truncate text-[11px] font-medium"
+                        style={{
+                          color: state.applied
+                            ? state.color.text
+                            : state.color.mutedText,
+                        }}
+                        title={describeToken(state)}
+                      >
+                        {label}
+                      </span>
+                    </div>
+                    <span
+                      className={`text-[11px] font-semibold ${
+                        state.applied ? "text-emerald-600" : "text-amber-600"
+                      }`}
+                    >
+                      {state.applied ? "사용됨" : "미사용"}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        )}
+        ) : null}
       </div>
 
       <div className="flex items-center gap-2">

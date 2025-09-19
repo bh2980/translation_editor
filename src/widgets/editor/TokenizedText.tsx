@@ -3,25 +3,33 @@
 import * as React from "react";
 import { cn } from "@/shared/lib/ui/cn";
 import {
-  buildTagActionFromNode,
   parseRichText,
   type PlaceholderNode,
   type RichTextNode,
-  type TagAction,
   type TagNode,
+  type TokenInstance,
 } from "./lib/tags";
+import { type TokenColor } from "./lib/token-colors";
 
 type TokenizedTextProps = {
   text?: string;
   tokens?: RichTextNode[];
-  onTagAction?: (action: TagAction) => void;
+  tokenStates?: Record<string, TokenRenderState>;
+  onTokenToggle?: (state: TokenRenderState) => void;
   className?: string;
+};
+
+export type TokenRenderState = {
+  token: TokenInstance;
+  applied: boolean;
+  color: TokenColor;
 };
 
 export function TokenizedText({
   text = "",
   tokens,
-  onTagAction,
+  tokenStates,
+  onTokenToggle,
   className,
 }: TokenizedTextProps) {
   const parsed = React.useMemo(
@@ -40,16 +48,31 @@ export function TokenizedText({
       }
 
       if (node.type === "placeholder") {
-        return renderPlaceholder(node, onTagAction);
+        return (
+          <PlaceholderToken
+            key={node.id}
+            node={node}
+            state={tokenStates?.[node.id]}
+            onToggle={onTokenToggle}
+          />
+        );
       }
 
       if (node.type === "tag") {
-        return renderTag(node, onTagAction, renderNode);
+        return (
+          <TagToken
+            key={node.id}
+            node={node}
+            state={tokenStates?.[node.id]}
+            onToggle={onTokenToggle}
+            renderNode={renderNode}
+          />
+        );
       }
 
       return null;
     },
-    [onTagAction]
+    [onTokenToggle, tokenStates]
   );
 
   return (
@@ -64,53 +87,77 @@ export function TokenizedText({
   );
 }
 
-function renderPlaceholder(
-  node: PlaceholderNode,
-  onTagAction?: (action: TagAction) => void
-) {
-  const handleClick = (event: React.MouseEvent<HTMLSpanElement>) => {
+type PlaceholderTokenProps = {
+  node: PlaceholderNode;
+  state?: TokenRenderState;
+  onToggle?: (state: TokenRenderState) => void;
+};
+
+function PlaceholderToken({ node, state, onToggle }: PlaceholderTokenProps) {
+  const applied = state?.applied ?? false;
+
+  const handleToggle = (event: React.MouseEvent<HTMLSpanElement>) => {
     event.stopPropagation();
-    onTagAction?.(buildTagActionFromNode(node));
+    if (state) {
+      onToggle?.(state);
+    }
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLSpanElement>) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       event.stopPropagation();
-      onTagAction?.(buildTagActionFromNode(node));
+      if (state) {
+        onToggle?.(state);
+      }
     }
   };
 
   return (
     <span
-      key={node.id}
       role="button"
       tabIndex={0}
       title={node.raw}
-      onClick={handleClick}
+      aria-pressed={applied}
+      data-applied={applied ? "true" : "false"}
+      onClick={handleToggle}
       onKeyDown={handleKeyDown}
-      className="inline-flex cursor-pointer items-center rounded border border-dashed border-amber-300 bg-amber-50 px-1 py-[1px] text-xs font-medium text-amber-700 align-middle hover:bg-amber-100 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-1"
+      className={cn(
+        "inline-flex max-w-full items-center gap-1 rounded border px-1 py-[1px] align-middle text-[11px] font-medium transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
+        state ? "cursor-pointer" : "cursor-default",
+        applied ? "opacity-70" : "hover:shadow-sm"
+      )}
+      style={state ? getTokenStyle(state) : undefined}
     >
-      {node.raw}
+      <span className="font-mono">{node.raw}</span>
     </span>
   );
 }
 
-function renderTag(
-  node: TagNode,
-  onTagAction: ((action: TagAction) => void) | undefined,
-  renderNode: (node: RichTextNode) => React.ReactNode
-) {
-  const handleClick = (event: React.MouseEvent<HTMLSpanElement>) => {
+type TagTokenProps = {
+  node: TagNode;
+  state?: TokenRenderState;
+  onToggle?: (state: TokenRenderState) => void;
+  renderNode: (node: RichTextNode) => React.ReactNode;
+};
+
+function TagToken({ node, state, onToggle, renderNode }: TagTokenProps) {
+  const applied = state?.applied ?? false;
+
+  const handleToggle = (event: React.MouseEvent<HTMLSpanElement>) => {
     event.stopPropagation();
-    onTagAction?.(buildTagActionFromNode(node));
+    if (state) {
+      onToggle?.(state);
+    }
   };
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLSpanElement>) => {
     if (event.key === "Enter" || event.key === " ") {
       event.preventDefault();
       event.stopPropagation();
-      onTagAction?.(buildTagActionFromNode(node));
+      if (state) {
+        onToggle?.(state);
+      }
     }
   };
 
@@ -120,31 +167,80 @@ function renderTag(
 
   return (
     <span
-      key={node.id}
       role="button"
       tabIndex={0}
       title={description}
-      onClick={handleClick}
+      aria-pressed={applied}
+      data-applied={applied ? "true" : "false"}
+      onClick={handleToggle}
       onKeyDown={handleKeyDown}
       className={cn(
-        "inline-flex cursor-pointer items-baseline gap-1 rounded border px-1 py-[1px] align-middle focus:outline-none focus:ring-2 focus:ring-offset-1",
-        node.selfClosing
-          ? "border-indigo-200 bg-indigo-50 text-indigo-700 hover:bg-indigo-100 focus:ring-indigo-400"
-          : "border-sky-300 bg-sky-50 text-sky-700 hover:bg-sky-100 focus:ring-sky-400"
+        "inline-flex max-w-full flex-wrap items-baseline gap-x-1 gap-y-0.5 rounded border px-1 py-[1px] align-middle text-xs transition focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1",
+        state ? "cursor-pointer" : "cursor-default",
+        applied ? "opacity-70" : "hover:shadow-sm"
       )}
+      style={state ? getTokenStyle(state) : undefined}
     >
-      <span className="rounded-sm bg-black/10 px-1 text-[10px] font-semibold uppercase tracking-tight text-current">
+      <span
+        className="rounded-sm px-[0.35rem] text-[10px] font-semibold uppercase tracking-tight"
+        style={state ? getLabelStyle(state) : undefined}
+      >
         {node.name}
       </span>
       {node.attributes ? (
-        <span className="text-[11px] text-muted-foreground">{node.attributes}</span>
+        <span
+          className="text-[11px]"
+          style={state ? { color: state.color.text } : undefined}
+        >
+          {node.attributes}
+        </span>
       ) : null}
-      {!node.selfClosing ? (
-        <span className="whitespace-pre-wrap text-sm text-foreground">
+      {!node.selfClosing && node.children.length > 0 ? (
+        <span
+          className="min-w-0 break-words text-sm text-foreground"
+          style={state ? getContentStyle(state) : undefined}
+        >
           {node.children.map((child) => renderNode(child))}
         </span>
       ) : null}
     </span>
   );
+}
+
+function getTokenStyle(state: TokenRenderState) {
+  return {
+    backgroundColor: state.color.background,
+    borderColor: state.color.border,
+    boxShadow: state.applied
+      ? `inset 0 0 0 1px ${state.color.accent}`
+      : undefined,
+  } satisfies React.CSSProperties;
+}
+
+function getLabelStyle(state: TokenRenderState) {
+  return {
+    backgroundColor: state.color.accent,
+    color: state.color.accentText,
+  } satisfies React.CSSProperties;
+}
+
+function getContentStyle(state: TokenRenderState) {
+  return {
+    backgroundColor: withAlpha(state.color.accent, 0.12),
+    borderRadius: "0.25rem",
+    paddingInline: "0.2rem",
+  } satisfies React.CSSProperties;
+}
+
+function withAlpha(hex: string, alpha: number) {
+  const normalized = hex.replace("#", "");
+  if (normalized.length !== 6) {
+    return hex;
+  }
+
+  const r = parseInt(normalized.slice(0, 2), 16);
+  const g = parseInt(normalized.slice(2, 4), 16);
+  const b = parseInt(normalized.slice(4, 6), 16);
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 

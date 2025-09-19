@@ -47,6 +47,21 @@ type ParentNode = {
 
 export type RichTextNode = TextNode | TagNode | PlaceholderNode;
 
+export type TokenInstance = {
+  id: string;
+  action: TagAction;
+  /**
+   * Composite key representing the serialized form of the token. Used to
+   * compare occurrences across source/translation strings.
+   */
+  key: string;
+  /**
+   * Zero-based index of this token among tokens sharing the same key.
+   */
+  index: number;
+  sourceType: "tag" | "placeholder";
+};
+
 const createIdFactory = () => {
   let id = 0;
   return () => `token-${id++}`;
@@ -207,6 +222,17 @@ export type TagAction =
       label: string;
     };
 
+const TOKEN_KEY_PREFIX = {
+  pair: "pair",
+  single: "single",
+} as const satisfies Record<TagAction["kind"], string>;
+
+const createTokenKey = (action: TagAction) => {
+  return action.kind === "pair"
+    ? `${TOKEN_KEY_PREFIX.pair}:${action.open}|${action.close}`
+    : `${TOKEN_KEY_PREFIX.single}:${action.value}`;
+};
+
 export function buildTagActionFromNode(
   node: TagNode | PlaceholderNode
 ): TagAction {
@@ -269,6 +295,164 @@ export function collectTokenStrings(nodes: RichTextNode[]): string[] {
 
   nodes.forEach(visit);
   return tokens;
+}
+
+export function enumerateTokenInstances(
+  nodes: RichTextNode[]
+): TokenInstance[] {
+  const instances: TokenInstance[] = [];
+  const occurrences = new Map<string, number>();
+
+  const visit = (node: RichTextNode) => {
+    if (node.type === "tag") {
+      const action = buildTagActionFromNode(node);
+      const key = createTokenKey(action);
+      const index = occurrences.get(key) ?? 0;
+      occurrences.set(key, index + 1);
+
+      instances.push({
+        id: node.id,
+        action,
+        key,
+        index,
+        sourceType: "tag",
+      });
+
+      node.children.forEach(visit);
+      return;
+    }
+
+    if (node.type === "placeholder") {
+      const action = buildTagActionFromNode(node);
+      const key = createTokenKey(action);
+      const index = occurrences.get(key) ?? 0;
+      occurrences.set(key, index + 1);
+
+      instances.push({
+        id: node.id,
+        action,
+        key,
+        index,
+        sourceType: "placeholder",
+      });
+      return;
+    }
+  };
+
+  nodes.forEach(visit);
+  return instances;
+}
+
+export function removeTokenInstance(
+  text: string,
+  target: TokenInstance
+): {
+  text: string;
+  removed: boolean;
+  selectionStart?: number;
+  selectionEnd?: number;
+} {
+  if (!text) {
+    return { text, removed: false };
+  }
+
+  const nodes = parseRichText(text);
+  const occurrences = new Map<string, number>();
+  let removed = false;
+  let selectionStart: number | undefined;
+  let selectionEnd: number | undefined;
+
+  type VisitResult = {
+    text: string;
+    length: number;
+  };
+
+  const visit = (node: RichTextNode, startOffset: number): VisitResult => {
+    if (node.type === "text") {
+      const value = node.value;
+      return { text: value, length: value.length };
+    }
+
+    if (node.type === "placeholder") {
+      const action = buildTagActionFromNode(node);
+      const key = createTokenKey(action);
+      const index = occurrences.get(key) ?? 0;
+      occurrences.set(key, index + 1);
+
+      const raw = node.raw;
+      if (!removed && key === target.key && index === target.index) {
+        removed = true;
+        selectionStart = startOffset;
+        selectionEnd = startOffset;
+        return { text: "", length: raw.length };
+      }
+
+      return { text: raw, length: raw.length };
+    }
+
+    const action = buildTagActionFromNode(node);
+    const key = createTokenKey(action);
+    const index = occurrences.get(key) ?? 0;
+    occurrences.set(key, index + 1);
+
+    const open = node.rawOpen;
+    const openLength = open.length;
+
+    if (action.kind === "single") {
+      if (!removed && key === target.key && index === target.index) {
+        removed = true;
+        selectionStart = startOffset;
+        selectionEnd = startOffset;
+        return { text: "", length: openLength };
+      }
+
+      return { text: open, length: openLength };
+    }
+
+    const close = node.rawClose ?? `</${node.name}>`;
+    const closeLength = close.length;
+
+    let childText = "";
+    let childLength = 0;
+    for (const child of node.children) {
+      const childResult = visit(
+        child,
+        startOffset + openLength + childLength
+      );
+      childText += childResult.text;
+      childLength += childResult.length;
+    }
+
+    if (!removed && key === target.key && index === target.index) {
+      removed = true;
+      selectionStart = startOffset;
+      selectionEnd = startOffset;
+      return {
+        text: childText,
+        length: openLength + childLength + closeLength,
+      };
+    }
+
+    return {
+      text: open + childText + close,
+      length: openLength + childLength + closeLength,
+    };
+  };
+
+  let nextText = "";
+  let offset = 0;
+  for (const node of nodes) {
+    const result = visit(node, offset);
+    nextText += result.text;
+    offset += result.length;
+  }
+
+  return {
+    text: nextText,
+    removed,
+    selectionStart,
+    selectionEnd,
+  };
 }
 
 export function findMissingTokens(
