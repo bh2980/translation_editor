@@ -242,7 +242,7 @@ function TagToken({ node, state, onToggle, renderNode }: TagTokenProps) {
       {node.children.length > 0 ? (
         <span
           className={cn(
-            "inline whitespace-pre-wrap rounded-sm px-1 align-baseline text-sm leading-relaxed",
+            "inline whitespace-pre-wrap rounded-sm px-1 align-baseline text-sm leading-relaxed box-decoration-slice",
             isOpenOnly ? "border-b border-dashed" : undefined
           )}
           style={highlightStyle}
