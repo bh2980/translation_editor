@@ -1,0 +1,138 @@
+export type TokenColor = {
+  id: string;
+  background: string;
+  border: string;
+  accent: string;
+  accentText: string;
+  text: string;
+  mutedText: string;
+};
+
+export const TOKEN_COLORS: TokenColor[] = [
+  {
+    id: "rose",
+    background: "#fef2f2",
+    border: "#fecdd3",
+    accent: "#fb7185",
+    accentText: "#7f1d1d",
+    text: "#b91c1c",
+    mutedText: "#be123c",
+  },
+  {
+    id: "amber",
+    background: "#fef3c7",
+    border: "#fcd34d",
+    accent: "#f59e0b",
+    accentText: "#78350f",
+    text: "#92400e",
+    mutedText: "#b45309",
+  },
+  {
+    id: "emerald",
+    background: "#ecfdf5",
+    border: "#6ee7b7",
+    accent: "#10b981",
+    accentText: "#064e3b",
+    text: "#047857",
+    mutedText: "#047857",
+  },
+  {
+    id: "sky",
+    background: "#e0f2fe",
+    border: "#7dd3fc",
+    accent: "#38bdf8",
+    accentText: "#0c4a6e",
+    text: "#0369a1",
+    mutedText: "#0ea5e9",
+  },
+  {
+    id: "violet",
+    background: "#ede9fe",
+    border: "#c4b5fd",
+    accent: "#8b5cf6",
+    accentText: "#4c1d95",
+    text: "#6d28d9",
+    mutedText: "#7c3aed",
+  },
+  {
+    id: "fuchsia",
+    background: "#fdf4ff",
+    border: "#f5d0fe",
+    accent: "#d946ef",
+    accentText: "#701a75",
+    text: "#a21caf",
+    mutedText: "#c026d3",
+  },
+  {
+    id: "lime",
+    background: "#f7fee7",
+    border: "#bef264",
+    accent: "#84cc16",
+    accentText: "#365314",
+    text: "#3f6212",
+    mutedText: "#4d7c0f",
+  },
+  {
+    id: "slate",
+    background: "#e2e8f0",
+    border: "#cbd5f5",
+    accent: "#64748b",
+    accentText: "#1e293b",
+    text: "#334155",
+    mutedText: "#475569",
+  },
+  {
+    id: "cyan",
+    background: "#cffafe",
+    border: "#67e8f9",
+    accent: "#06b6d4",
+    accentText: "#155e75",
+    text: "#0e7490",
+    mutedText: "#0891b2",
+  },
+  {
+    id: "orange",
+    background: "#ffedd5",
+    border: "#fdba74",
+    accent: "#f97316",
+    accentText: "#7c2d12",
+    text: "#c2410c",
+    mutedText: "#ea580c",
+  },
+  {
+    id: "teal",
+    background: "#ccfbf1",
+    border: "#5eead4",
+    accent: "#14b8a6",
+    accentText: "#115e59",
+    text: "#0f766e",
+    mutedText: "#0d9488",
+  },
+  {
+    id: "indigo",
+    background: "#e0e7ff",
+    border: "#a5b4fc",
+    accent: "#6366f1",
+    accentText: "#312e81",
+    text: "#4338ca",
+    mutedText: "#4f46e5",
+  },
+  {
+    id: "pink",
+    background: "#fce7f3",
+    border: "#f9a8d4",
+    accent: "#ec4899",
+    accentText: "#831843",
+    text: "#be185d",
+    mutedText: "#db2777",
+  },
+  {
+    id: "stone",
+    background: "#e7e5e4",
+    border: "#d6d3d1",
+    accent: "#78716c",
+    accentText: "#292524",
+    text: "#44403c",
+    mutedText: "#57534e",
+  },
+];
