@@ -6,7 +6,9 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "lint": "eslint . --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0"
+    "lint": "eslint . --ext .ts,.tsx --report-unused-disable-directives --max-warnings 0",
+    "test:unit": "vitest",
+    "test:e2e": "playwright test"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "latest",
@@ -64,12 +66,16 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "vaul": "^0.9.9",
+    "vitest": "^3.2.4",
     "xlsx": "latest",
     "zod": "3.25.67",
     "zustand": "^5.0.7"
   },
   "devDependencies": {
+    "@playwright/test": "^1.55.1",
     "@tailwindcss/postcss": "^4.1.9",
+    "@testing-library/dom": "^10.4.1",
+    "@testing-library/react": "^16.3.0",
     "@types/node": "^22",
     "@types/papaparse": "^5.3.16",
     "@types/react": "^19",
